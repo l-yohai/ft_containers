@@ -6,7 +6,7 @@
 /*   By: yohlee <yohlee@student.42seoul.kr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/05 03:41:33 by yohlee            #+#    #+#             */
-/*   Updated: 2020/10/25 18:52:13 by yohlee           ###   ########.fr       */
+/*   Updated: 2020/10/29 08:25:32 by yohlee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,6 +112,7 @@ public:
 		iterator_type it(*this);
 		return *(--it);
 	}
+
 	reverse_iterator operator+(difference_type n) const
 	{
 		reverse_iterator<iterator_type> it(*this);
