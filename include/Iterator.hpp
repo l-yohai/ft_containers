@@ -6,7 +6,7 @@
 /*   By: yohlee <yohlee@student.42seoul.kr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/05 03:41:33 by yohlee            #+#    #+#             */
-/*   Updated: 2020/10/29 08:25:32 by yohlee           ###   ########.fr       */
+/*   Updated: 2020/10/30 18:58:02 by yohlee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,9 +20,21 @@ namespace ft
 
 struct input_iterator_tag {};
 struct output_iterator_tag {};
-struct forward_iterator_tag : input_iterator_tag {};
-struct bidirectional_iterator_tag : forward_iterator_tag {};
-struct random_access_iterator_tag : bidirectional_iterator_tag {};
+struct forward_iterator_tag {};
+struct bidirectional_iterator_tag {};
+struct random_access_iterator_tag {};
+
+
+
+
+
+
+
+
+
+
+
+
 
 template <class Category, class T, class Distance = ptrdiff_t, class Pointer = T*, class Reference = T&>
 struct iterator

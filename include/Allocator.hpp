@@ -6,7 +6,7 @@
 /*   By: yohlee <yohlee@student.42seoul.kr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/05 09:15:17 by yohlee            #+#    #+#             */
-/*   Updated: 2020/10/19 07:19:53 by yohlee           ###   ########.fr       */
+/*   Updated: 2020/10/30 20:00:44 by yohlee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ namespace ft
 {
 
 template <class T>
-class allocator
+class Allocator
 {
 public:
 	typedef T value_type;
@@ -30,15 +30,15 @@ public:
 	typedef size_t size_type;
 	typedef std::ptrdiff_t difference_type;
 	template <class U>
-	struct rebind { typedef allocator<U> other; };
-	allocator() throw() {};
-	allocator(const allocator& alloc) throw() {};
+	struct rebind { typedef Allocator<U> other; };
+	Allocator() throw() {};
+	Allocator(const Allocator& alloc) throw() {};
 	template <class U>
-	allocator(const allocator<U>& alloc) throw() {};
-	~allocator() throw() {};
+	Allocator(const Allocator<U>& alloc) throw() {};
+	~Allocator() throw() {};
 	pointer address(reference x) const { return &x; }
 	const_pointer address(const_reference x) const { return &x; }
-	pointer allocate(size_type n, allocator<void>::const_pointer hint=0) {
+	pointer allocate(size_type n, Allocator<void>::const_pointer hint=0) {
 		pointer ret = (pointer)(operator new(n * sizeof(T)));
 		return ret;
 	}
