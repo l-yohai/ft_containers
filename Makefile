@@ -1,43 +1,104 @@
-NAME = ft_containers
-INCLUDES = -I include
-CC = clang++
-CFLAGS = -Wall -Wextra -Werror
-RM = rm -rf
+## PIMPED MAKEFILE ##
 
-MAIN_FILES = main
+# COLORS #
 
-SRCS_PATH = $(MAIN_FILES)
-VPATH := .:srcs
-SRCS = $(addsuffix .cpp, $(SRCS_PATH))
+# This is a minimal set of ANSI/VT100 color codes
+END			=	\e[0m
+BOLD		=	\e[1m
+UNDER		=	\e[4m
+REV			=	\e[7m
 
-OBJDIR = ./objs
-OBJS = $(addprefix $(OBJDIR)/, $(addsuffix .o, $(MAIN_FILES)))
+# Colors
+GREY		=	\e[30m
+RED			=	\e[31m
+GREEN		=	\e[32m
+YELLOW		=	\e[33m
+BLUE		=	\e[34m
+PURPLE		=	\e[35m
+CYAN		=	\e[36m
+WHITE		=	\e[37m
 
-GREEN = \033[0;32m
-RED = \033[0;31m
-RESET = \033[0m
+# Inverted, i.e. colored backgrounds
+IGREY		=	\e[40m
+IRED		=	\e[41m
+IGREEN		=	\e[42m
+IYELLOW		=	\e[43m
+IBLUE		=	\e[44m
+IPURPLE		=	\e[45m
+ICYAN		=	\e[46m
+IWHITE		=	\e[47m
 
-all: $(NAME)
+# **************************************************************************** #
 
-${NAME}: ${OBJS}
-	@echo "$(GREEN)Making START$(RESET)"
-	@${CC} ${CFLAGS} ${INCLUDES} ${OBJS} -o ${NAME}
-	@echo "$(GREEN)DONE"
+# COMPILATION #
 
-$(OBJDIR)/%.o : %.cpp
-	@mkdir -p $(OBJDIR)
-	@${CC} ${CFLAGS} ${INCLUDES} -c $< -o $@
+CC			=	clang++
+CC_FLAGS	=	-Wall -Wextra -Werror
+
+# COMMANDS #
+
+RM			=	rm -rf
+
+# DIRECTORIES #
+
+DIR_HEADERS =	./include/
+DIR_SRCS	=	./srcs/
+DIR_OBJS	=	./objs/
+
+# FILES #
+
+SRC			=	main.cpp
+SRCS		=	$(SRC)
+
+# COMPILED_SOURCES #
+
+OBJS 		=	$(SRCS:%.cpp=$(DIR_OBJS)%.o)
+NAME 		=	ft_containers
+
+# **************************************************************************** #
+
+## RULES ##
+
+all:			$(NAME)
+
+# VARIABLES RULES #
+
+$(NAME):		$(OBJS)
+				@printf "\033[2K\r$(GREEN) All files compiled into '$(DIR_OBJS)'. $(END)✅\n"
+				@$(CC) $(CC_FLAGS) -I $(DIR_HEADERS) $(OBJS) -o $(NAME)
+				@printf "$(GREEN) Executable '$(NAME)' created. $(END)✅\n"
+
+# COMPILED_SOURCES RULES #
+
+$(OBJS):		| $(DIR_OBJS)
+
+
+$(DIR_OBJS)%.o: $(DIR_SRCS)%.cpp
+				@$(CC) $(CC_FLAGS) -I $(DIR_HEADERS) -c $< -o $@
+				@printf "\033[2K\r $(YELLOW)Compiling $< $(END)⌛"
+
+$(DIR_OBJS):
+				@mkdir -p $(DIR_OBJS)
+
+
+# OBLIGATORY PART #
 
 clean:
-	@echo "$(RESET)Cleaning your object files$(RESET)"
-	@${RM} $(OBJDIR) 
-	@echo "$(RED)clean DONE"
+				@$(RM) $(DIR_OBJS)
+				@printf "$(RED) '"$(DIR_OBJS)"' has been deleted. $(END)🗑️\n"
 
-fclean: clean
-	@echo "$(RESET)Removing program"
-	@${RM} $(NAME)
-	@echo "$(RED)fclean DONE"
+fclean:			clean
+				@$(RM) $(NAME)
+				@printf "$(RED) '"$(NAME)"' has been deleted. $(END)🗑️\n"
+				@$(RM) 
+				@printf "$(RED) '""' has been deleted. $(END)🗑️\n"
 
-re: fclean all
+re:				fclean all
 
-.PHONY:	all clean fclean re
+# BONUS #
+
+bonus:			all
+
+re_bonus:		fclean bonus
+
+.PHONY:			all clean fclean re bonus re_bonus

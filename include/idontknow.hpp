@@ -1,19 +1,19 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Iterator.hpp                                       :+:      :+:    :+:   */
+/*   idontknow.hpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: yohlee <yohlee@student.42seoul.kr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2020/10/31 15:32:47 by yohlee            #+#    #+#             */
-/*   Updated: 2020/10/31 18:02:47 by yohlee           ###   ########.fr       */
+/*   Created: 2020/10/05 03:41:33 by yohlee            #+#    #+#             */
+/*   Updated: 2020/10/31 17:55:02 by yohlee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef ITERATOR_HPP
 # define ITERATOR_HPP
 
-# include <cstddef>
+# include <iostream>
 
 namespace ft
 {
@@ -57,7 +57,18 @@ public:
 	typedef random_access_iterator_tag	iterator_category;
 };
 
+template <class Category, class T, class Distance = ptrdiff_t, class Pointer = T*, class Reference = T&>
+struct iterator
+{
+	typedef T			value_type;
+	typedef Distance 	difference_type;
+	typedef Pointer		pointer;
+	typedef Reference	reference;
+	typedef Category 	iterator_category;
+};
+
 template <class iterator>
+// class reverse_iterator : public ft::iterator<typename ft::iterator_traits<iterator>::iterator_category, typename ft::iterator_traits<iterator>::value_type, typename ft::iterator_tarits<iterator>::difference_type, typename ft::iterator_traits<iterator>::pointer, typename ft::iterator_traits<iterator>::reference>
 class reverse_iterator
 {
 private:
@@ -76,12 +87,14 @@ public:
 	reverse_iterator() : _it() {}
 	explicit reverse_iterator(iterator_type it) : _it(it) {}
 
-	reverse_iterator(const reverse_iterator<iterator>& rev_it) : _it(rev_it._it)
+	template <class Iter>
+	reverse_iterator(const reverse_iterator<Iter>& rev_it) : _it(rev_it._it)
 	{
 		*this = rev_it;
 	}
 
-	reverse_iterator& operator=(const reverse_iterator<iterator>& rev_it)
+	template <class Iter>
+	reverse_iterator& operator=(const reverse_iterator<Iter>& rev_it)
 	{
 		this->_it = rev_it._it;
 		return *this;
@@ -98,7 +111,7 @@ public:
 		return *(--it);
 	}
 
-	reverse_iterator operator+(difference_type n) const
+	reverse_iterator operator+(difference_type n) const;
 	{
 		return (this->_it - n);
 	}
