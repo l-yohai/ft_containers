@@ -6,21 +6,29 @@
 /*   By: yohlee <yohlee@student.42seoul.kr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/19 08:58:20 by yohlee            #+#    #+#             */
-/*   Updated: 2020/10/31 15:32:59 by yohlee           ###   ########.fr       */
+/*   Updated: 2020/11/01 12:24:58 by yohlee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef VECTOR_HPP
 # define VECTOR_HPP
 
+# include "Iterator.hpp"
+# include "Allocator.hpp"
 # include <iostream>
 
 namespace ft
 {
 
-template < class T, class Alloc = std::allocator<T> >
+template < class T, class Alloc = ft::Allocator<T> >
 class Vector
 {
+private:
+	allocator_type	_allocator;
+	pointer			_begin;
+	pointer			_end;
+	pointer			_end_capacity;
+
 public:
 	typedef T value_type;
 	typedef Alloc allocator_type;
@@ -30,37 +38,25 @@ public:
 	typedef typename Alloc::pointer pointer;
 	typedef typename Alloc::const_pointer const_pointer;
 
-	typedef random_access_iterator<pointer> iterator;
-	typedef random_access_iterator<const_pointer> const_iterator;
-	typedef reverse_iterator<iterator> reverse_iterator;
-	typedef reverse_iterator<const_iterator> const_reverse_iterator;
+	typedef ft::random_access_iterator<pointer> iterator;
+	typedef ft::random_access_iterator<const_pointer> const_iterator;
+	typedef ft::reverse_iterator<iterator> reverse_iterator;
+	typedef ft::reverse_iterator<const_iterator> const_reverse_iterator;
 
 	typedef ptrdiff_t difference_type;
 	typedef size_t size_type;
 
 public:
-	/* ====================================================================== */
-	/*           ___                _                   _                     */
-	/*          / __\___  _ __  ___| |_ _ __ _   _  ___| |_ ___  _ __         */
-	/*         / /  / _ \| '_ \/ __| __| '__| | | |/ __| __/ _ \| '__|        */
-	/*        / /__| (_) | | | \__ \ |_| |  | |_| | (__| || (_) | |           */
-	/*        \____/\___/|_| |_|___/\__|_|   \__,_|\___|\__\___/|_|           */
-	/*                                                                        */
-	/* ====================================================================== */
-
-	/* Default */
-	Vector();
 	explicit Vector(const allocator_type& alloc = allocator_type())
 	: _allocator(alloc), _begin(0), _end(0), _end_capacity(0) {}
-	
-	/* Fill */
+
 	explicit Vector(size_type n, const value_type& val = value_type(), const allocator_type& alloc = allocator_type())
 	: _allocator(alloc), _begin(0), _end(0), _end_capacity(0)
 	{
-		if (n) assign(n, val);
+		if (n)
+			assign(n, val);
 	}
 
-	/* Range */
 	template <class InputIterator>
 	Vector(InputIterator first, InputIterator last, const allocator_type& alloc = allocator_type())
 	: _allocator(alloc), _begin(0), _end(0), _end_capacity(0)
@@ -68,24 +64,11 @@ public:
 		assign(first, last);
 	}
 
-	/* Copy */
 	Vector(const Vector& x)
 	: _allocator(x._allocator), _begin(0), _end(0), _end_capacity(0)
 	{
 		operator=(x);
 	}
-
- vector& operator= (const vector& x);
-
-
-	/* ====================================================================== */
-	/*                  ___                 _                 _               */
-	/*                 /___\__   _____ _ __| | ___   __ _  __| |              */
-	/*                //  //\ \ / / _ \ '__| |/ _ \ / _` |/ _` |              */
-	/*               / \_//  \ V /  __/ |  | | (_) | (_| | (_| |              */
-	/*               \___/    \_/ \___|_|  |_|\___/ \__,_|\__,_|              */
-	/*                                                                        */
-	/* ====================================================================== */
 
 	Vector& operator=(const Vector& x)
 	{
@@ -93,61 +76,76 @@ public:
 			assign(x.begin(), x.end());
 		return (*this);
 	}
-reference operator[] (size_type n);
-const_reference operator[] (size_type n) const;
-	/* ====================================================================== */
-	/*               ___          _                   _                       */
-	/*              /   \___  ___| |_ _ __ _   _  ___| |_ ___  _ __           */
-	/*             / /\ / _ \/ __| __| '__| | | |/ __| __/ _ \| '__|          */
-	/*            / /_//  __/\__ \ |_| |  | |_| | (__| || (_) | |             */
-	/*           /___,' \___||___/\__|_|   \__,_|\___|\__\___/|_|             */
-	/*                                                                        */
-	/* ====================================================================== */
 
-	virtual ~Vector()
+	~Vector()
 	{
 		deallocate();
 	}
 
-	/* ====================================================================== */
-	/*                                 _   _ _                                */
-	/*                           /\ /\| |_(_) |___                            */
-	/*                          / / \ \ __| | / __|                           */
-	/*                          \ \_/ / |_| | \__ \                           */
-	/*                           \___/ \__|_|_|___/                           */
-	/*                                                                        */
-	/* ====================================================================== */
-
 	template <class InputIterator>
 	void assign(InputIterator first, InputIterator last)
 	{
-
+		clear();
+		insert(begin(), first, last);
 	}
 
 	void assign(size_type n, const value_type& val)
 	{
-		
+		clear();
+		insert(begin(), n, val);
 	}
 
-	reference at(size_type n);
-	const_reference at(size_type n) const;
+	reference at(size_type n)
+	{
+		if (n >= size())
+			throw "Out of Bound";
+		return (this->_begin[n]);
+	}
 
-	reference back();
-	const_reference back() const;
+	const_reference at(size_type n) const
+	{
+		if (n >= size())
+			throw "Out of Bound";
+		return (this->_begin[n]);
+	}
 
-	iterator begin();
-	const_iterator begin() const;
+	reference back()
+	{
+		return (*(this->_end - 1));
+	}
+
+	const_reference back() const
+	{
+		return (*(this->_end - 1));
+	}
+
+	iterator begin()
+	{
+		return (iterator(&(front())));
+	}
+
+	const_iterator begin() const
+	{
+		return (const_iterator(&(front())));
+	}
 	
-	size_type capacity() const;
+	size_type capacity() const
+	{
+		return (static_cast<size_type>(this->_end_capacity - this->_begin));
+	}
 
-	const_iterator cbegin() const noexcept;
+	// const_iterator cbegin() const noexcept;
 
-	const_iterator cend() const noexcept;
+	// const_iterator cend() const noexcept;
 
-	void clear();
+	void clear()
+	{
+		erase(begin(), end());
+	}
 
-	const_reverse_iterator crbegin() const noexcept;
-	const_reverse_iterator crend() const noexcept;
+	// const_reverse_iterator crbegin() const noexcept;
+	// const_reverse_iterator crend() const noexcept;
+
 	value_type* data() noexcept;
 	const value_type* data() const noexcept;
 
@@ -180,6 +178,10 @@ const_reference operator[] (size_type n) const;
 	void insert (iterator position, InputIterator first, InputIterator last);
 
 	size_type max_size() const;
+
+reference operator[] (size_type n);
+
+const_reference operator[] (size_type n) const;
 
 	void pop_back();
 
