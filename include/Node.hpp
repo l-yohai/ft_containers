@@ -6,7 +6,7 @@
 /*   By: yohlee <yohlee@student.42seoul.kr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/11/01 14:30:14 by yohlee            #+#    #+#             */
-/*   Updated: 2020/11/01 15:04:04 by yohlee           ###   ########.fr       */
+/*   Updated: 2020/11/03 09:27:15 by yohlee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,13 +27,9 @@ private:
 	T		_data;
 
 public:
-	Node() : _next(this), _prev(this), _data(nullptr) {}
-	// {
-	// 	this->_next = this;
-	// 	this->_prev = this;
-	// }
+	Node() : _next(this), _prev(this), _data(0) {}
 
-	Node(const Node& node) : _next(node._next), _prev(node._prev)
+	Node(const Node& node) : _next(node._next), _prev(node._prev), _data(node._data)
 	{
 		*this = node;
 	}
@@ -42,6 +38,7 @@ public:
 	{
 		this->_next = node._next;
 		this->_prev = node._prev;
+		this->_data = node._data;
 		return (*this);
 	}
 
@@ -83,6 +80,9 @@ public:
 		return (this);
 	}
 
+	T& getData() { return (this->_data); }
+	const T& getData() const { return (this->_data); }
+
 };
 
 // template<>
@@ -115,19 +115,18 @@ void swap(Node& x, Node& y)
 }
 
 template <class Iterator>
-class bidirectional_iterator : public ft::iterator<ft::bidirectional_iterator_tag, Iterator>
+class bidirectional_iterator
 {
 private:
 	typedef Node<Iterator>	Node;
 	Node*					_node;
 
 public:
-	typedef Iterator											iterator_type;
-	typedef ft::iterator_traits<Iterator>::iterator_category	iterator_category;
-	typedef ft::iterator_traits<Iterator>::value_type			value_type;
-	typedef ft::iterator_traits<Iterator>::difference_type		difference_type;
-	typedef ft::iterator_traits<Iterator>::reference			reference;
-	typedef ft::iterator_traits<Iterator>::pointer				pointer;
+	typedef ft::bidirectional_iterator_tag	iterator_category;
+	typedef T								value_type;
+	typedef ptrdiff_t						difference_type;
+	typedef T&								reference;
+	typedef T*								pointer;
 
 public:
 	bidirectional_iterator() : _node() {}
@@ -147,123 +146,58 @@ public:
 
 	~bidirectional_iterator() {}
 
-	iterator_type base() const
-	{
-		return (this->_it);
-	}
-
 	reference operator*() const
 	{
-		iterator_type it = this->_it;
-		return (*(--it));
-	}
-
-	bidirectional_iterator operator+(difference_type n) const
-	{
-		return (this->_it + n);
+		return (static_cast<Node*>(this->_node)->getData());
 	}
 
 	bidirectional_iterator& operator++()
 	{
-		++(this->_it);
+		this->_node = static_cast<Node*>(this->_node->next());
 		return (*this);
 	}
 
 	bidirectional_iterator operator++(int)
 	{
 		bidirectional_iterator tmp = *this;
-		++(*this);
+		this->_node = static_cast<Node*>(this->_node->next());
 		return (tmp);
-	}
-
-	bidirectional_iterator& operator+=(difference_type n)
-	{
-		bidirectional_iterator<iterator_type> it(*this);
-		it += n;
-		return (*this);
-	}
-
-	bidirectional_iterator operator-(difference_type n) const
-	{
-		return (this->_it - n);
 	}
 
 	bidirectional_iterator& operator--()
 	{
-		--(this->_it);
+		this->_node = static_cast<Node*>(this->_node->previous());
 		return (*this);
 	}
 
 	bidirectional_iterator operator--(int)
 	{
 		bidirectional_iterator tmp = *this;
-		--(this->_it);
+		this->_node = static_cast<Node*>(this->_node->previous());
 		return (tmp);
-	}
-
-	bidirectional_iterator& operator-=(difference_type n)
-	{
-		this->_it -= n;
-		return (*this);
 	}
 
 	pointer operator->() const
 	{
-		return (this->_it);
+		return (&static_cast<Node*>(this->_node)->getData());
 	}
 
-	reference operator[](difference_type n) const
+	Node* getNode() const
 	{
-		return (*(this->_it + n));
+		return (this->_node);
 	}
 };
 
-template <class Iterator>
-bool operator==(const bidirectional_iterator<Iterator>& lhs, const bidirectional_iterator<Iterator>& rhs)
+template <class T>
+bool operator==(const bidirectional_iterator<T>& lhs, const bidirectional_iterator<T>& rhs)
 {
-	return (lhs.base() == rhs.base());
+	return (lhs._node() == rhs._node());
 }
 
-template <class Iterator>
-bool operator!=(const bidirectional_iterator<Iterator>& lhs, const bidirectional_iterator<Iterator>& rhs)
+template <class T>
+bool operator!=(const bidirectional_iterator<T>& lhs, const bidirectional_iterator<T>& rhs)
 {
-	return (lhs.base() != rhs.base());
-}
-
-template <class Iterator>
-bool operator<(const bidirectional_iterator<Iterator>& lhs, const bidirectional_iterator<Iterator>& rhs)
-{
-	return (lhs.base() < rhs.base());
-}
-
-template <class Iterator>
-bool operator<=(const bidirectional_iterator<Iterator>& lhs, const bidirectional_iterator<Iterator>& rhs)
-{
-	return (lhs.base() <= rhs.base());
-}
-
-template <class Iterator>
-bool operator>(const bidirectional_iterator<Iterator>& lhs, const bidirectional_iterator<Iterator>& rhs)
-{
-	return (lhs.base() > rhs.base());
-}
-
-template <class Iterator>
-bool operator>=(const bidirectional_iterator<Iterator>& lhs, const bidirectional_iterator<Iterator>& rhs)
-{
-	return (lhs.base() >= rhs.base());
-}
-
-template <class Iterator>
-typename bidirectional_iterator<Iterator>::difference_type operator-(const bidirectional_iterator<Iterator>& lhs, const bidirectional_iterator<Iterator>& rhs)
-{
-	return (lhs.base() + rhs.base());
-}
-
-template <class Iterator>
-bidirectional_iterator<Iterator> operator+(typename bidirectional_iterator<Iterator>::difference_type n, const bidirectional_iterator<Iterator>& rev_it)
-{
-	return (bidirectional_iterator<Iterator> (rev_it.base() - n));
+	return (lhs._node() != rhs._node());
 }
 
 }

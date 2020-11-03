@@ -6,15 +6,16 @@
 /*   By: yohlee <yohlee@student.42seoul.kr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/05 03:20:17 by yohlee            #+#    #+#             */
-/*   Updated: 2020/10/30 20:13:55 by yohlee           ###   ########.fr       */
+/*   Updated: 2020/11/03 09:31:31 by yohlee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef LIST_HPP
 # define LIST_HPP
 
-#include "Allocator.hpp"
-// # include "Iterator.hpp"
+# include "Allocator.hpp"
+# include "Iterator.hpp"
+# include "Node.hpp"
 
 namespace ft
 {
@@ -23,7 +24,11 @@ template < class T, class Alloc = ft::Allocator<T> >
 class List
 {
 private:
-
+	typedef ft::Node<T> _node;
+	typedef typename Alloc::template rebind<Node>::other NodeAlloc;
+	NodeAlloc _allocator;
+	NodeAlloc _node_allocator;
+	Node _base;
 
 public:
 	typedef T value_type;
@@ -41,28 +46,28 @@ public:
 
 public:
 
-	explicit list(const allocator_type& alloc = allocator_type())
+	explicit List(const allocator_type& alloc = allocator_type()) : _allocator(alloc)
 	{
 		
 	}
 
-	explicit list(size_type n, const value_type& val = value_type(), const allocator_type& alloc = allocator_type())
+	explicit List(size_type n, const value_type& val = value_type(), const allocator_type& alloc = allocator_type())
 	{
 		
 	}
 
 	template <class InputIterator>
-	list(InputIterator first, InputIterator last, const allocator_type& alloc = allocator_type())
+	List(InputIterator first, InputIterator last, const allocator_type& alloc = allocator_type())
 	{
 
 	}
 
-	list(const list& x)
+	List(const List& x)
 	{
 
 	}
 
-	~list()
+	~List()
 	{
 
 	}
@@ -201,20 +206,20 @@ public:
 	}
 
 	// (1)
-	void merge (list& x)
+	void merge (List& x)
 	{
 
 	}
 	// (2)
 	template <class Compare>
-	void merge (list& x, Compare comp)
+	void merge (List& x, Compare comp)
 	{
 
 	}
 
 
 	// copy (1)
-	list& operator= (const list& x)
+	List& operator= (const List& x)
 	{
 
 	}
@@ -295,23 +300,23 @@ public:
 
 	}
 
-	// entire list (1)
-	void splice (iterator position, list& x)
+	// entire List (1)
+	void splice (iterator position, List& x)
 	{
 
 	}
 	// single element (2)
-	void splice (iterator position, list& x, iterator i)
+	void splice (iterator position, List& x, iterator i)
 	{
 
 	}
 	// element range (3)
-	void splice (iterator position, list& x, iterator first, iterator last)
+	void splice (iterator position, List& x, iterator first, iterator last)
 	{
 
 	}
 
-	void swap (list& x)
+	void swap (List& x)
 	{
 
 	}
@@ -330,40 +335,40 @@ public:
 
 	// (1)
 	template <class T, class Alloc>
-	bool operator==(const list<T,Alloc>& lhs, const list<T,Alloc>& rhs)
+	bool operator==(const List<T,Alloc>& lhs, const List<T,Alloc>& rhs)
 	{
 
 	}
 	// (2)
 	template <class T, class Alloc>
-	bool operator!=(const list<T,Alloc>& lhs, const list<T,Alloc>& rhs)
+	bool operator!=(const List<T,Alloc>& lhs, const List<T,Alloc>& rhs)
 	{
 
 	}
 	// (3)
 	template <class T, class Alloc>
-	bool operator<(const list<T,Alloc>& lhs, const list<T,Alloc>& rhs)
+	bool operator<(const List<T,Alloc>& lhs, const List<T,Alloc>& rhs)
 	{
 
 	}
 	// (4)
 	template <class T, class Alloc>
-	bool operator<=(const list<T,Alloc>& lhs, const list<T,Alloc>& rhs)
+	bool operator<=(const List<T,Alloc>& lhs, const List<T,Alloc>& rhs)
 	{
 	}
 	// (5)
 	template <class T, class Alloc>
-	bool operator>(const list<T,Alloc>& lhs, const list<T,Alloc>& rhs)
+	bool operator>(const List<T,Alloc>& lhs, const List<T,Alloc>& rhs)
 	{
 	}
 	// (6)
 	template <class T, class Alloc>
-	bool operator>=(const list<T,Alloc>& lhs, const list<T,Alloc>& rhs)
+	bool operator>=(const List<T,Alloc>& lhs, const List<T,Alloc>& rhs)
 	{
 	}
 
 	template <class T, class Alloc>
-	void swap (list<T,Alloc>& x, list<T,Alloc>& y)
+	void swap (List<T,Alloc>& x, List<T,Alloc>& y)
 	{
 	}
 

@@ -6,7 +6,7 @@
 /*   By: yohlee <yohlee@student.42seoul.kr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/31 15:32:47 by yohlee            #+#    #+#             */
-/*   Updated: 2020/11/01 14:42:50 by yohlee           ###   ########.fr       */
+/*   Updated: 2020/11/03 09:12:14 by yohlee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ class iterator
 {
 public:
 	typedef Category iterator_category;
-	typedef value_type T;
+	typedef T value_type;
 	typedef Distance difference_type;
 	typedef Pointer pointer;
 	typedef Reference reference;
@@ -239,17 +239,18 @@ random_access_iterator<Iterator> operator+(typename random_access_iterator<Itera
 
 template <class Iterator>
 class reverse_iterator
+:public ft::iterator<typename ft::iterator_traits<Iterator>::iterator_category, typename ft::iterator_traits<Iterator>::value_type, typename ft::iterator_traits<Iterator>::difference_type, typename ft::iterator_traits<Iterator>::pointer, typename ft::iterator_traits<Iterator>::reference>
 {
 private:
 	Iterator _it;
 
 public:
-	typedef Iterator												iterator_type;
-	typedef typename iterator_traits<Iterator>::iterator_category	iterator_category;
-	typedef typename iterator_traits<Iterator>::value_type			value_type;
-	typedef typename iterator_traits<Iterator>::difference_type		difference_type;
-	typedef typename iterator_traits<Iterator>::pointer				pointer;
-	typedef typename iterator_traits<Iterator>::reference			reference;
+	typedef Iterator											iterator_type;
+	typedef ft::iterator_traits<Iterator>::iterator_category	iterator_category;
+	typedef ft::iterator_traits<Iterator>::value_type			value_type;
+	typedef ft::iterator_traits<Iterator>::difference_type		difference_type;
+	typedef ft::iterator_traits<Iterator>::pointer				pointer;
+	typedef ft::iterator_traits<Iterator>::reference			reference;
 
 public:
 
