@@ -33,7 +33,7 @@ IWHITE		=	\e[47m
 # COMPILATION #
 
 CC			=	clang++
-CC_FLAGS	=	-Wall -Wextra -Werror
+CC_FLAGS	=	-Wall -Wextra -Werror -std=c++11
 
 # COMMANDS #
 
@@ -90,8 +90,6 @@ clean:
 fclean:			clean
 				@$(RM) $(NAME)
 				@printf "$(RED) '"$(NAME)"' has been deleted. $(END)🗑️\n"
-				@$(RM) 
-				@printf "$(RED) '""' has been deleted. $(END)🗑️\n"
 
 re:				fclean all
 

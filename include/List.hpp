@@ -6,7 +6,7 @@
 /*   By: yohlee <yohlee@student.42seoul.kr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/05 03:20:17 by yohlee            #+#    #+#             */
-/*   Updated: 2020/11/03 09:31:31 by yohlee           ###   ########.fr       */
+/*   Updated: 2020/11/08 12:52:55 by yohlee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,8 +37,8 @@ public:
 	typedef const value_type& const_reference;
 	typedef value_type* pointer;
 	typedef const value_type* const_pointer;
-	typedef bidirectinal_iterator::value_type iterator;
-	typedef const bidirectinal_iterator::value_type const_iterator;
+	typedef list_iterator::value_type iterator;
+	typedef const list_iterator::value_type const_iterator;
 	typedef reverse_iterator<iterator> reverse_iterator;
 	typedef reverse_iterator<const_iterator> const_reverse_iterator;
 	typedef std::ptrdiff_t difference_type;

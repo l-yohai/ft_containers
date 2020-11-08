@@ -6,7 +6,7 @@
 /*   By: yohlee <yohlee@student.42seoul.kr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/11/01 14:30:14 by yohlee            #+#    #+#             */
-/*   Updated: 2020/11/03 09:27:15 by yohlee           ###   ########.fr       */
+/*   Updated: 2020/11/08 12:50:33 by yohlee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ private:
 	T		_data;
 
 public:
-	Node() : _next(this), _prev(this), _data(0) {}
+	Node() : _next(0), _prev(0), _data(0) {}
 
 	Node(const Node& node) : _next(node._next), _prev(node._prev), _data(node._data)
 	{
@@ -42,12 +42,14 @@ public:
 		return (*this);
 	}
 
+	virtual ~Node() {}
+
 	Node*& next()
 	{
 		return (this->_next);
 	}
 
-	Node* next() const
+	const Node* next() const
 	{
 		return (this->_next);
 	}
@@ -57,65 +59,62 @@ public:
 		return (this->_prev);
 	}
 
-	Node* previous() const
+	const Node* previous() const
 	{
 		return (this->_prev);
 	}
 
-	void connect(Node* to)
+	T& getData()
 	{
-		this->next() = to;
-		this->previous() = to->previous();
-
-		to->previous()->next() = this;
-		to->previous() = this;
+		return (this->_data);
 	}
 
-	Node* disconnect()
+	const T& getData() const
 	{
-		Node* const node = next();
-		
-		this->previous()->next() = node;
-		node->previous() = this->previous();
-		return (this);
+		return (this->_data);
 	}
 
-	T& getData() { return (this->_data); }
-	const T& getData() const { return (this->_data); }
+	void insert_before(Node* node)
+	{
+		if (this->_prev)
+		{
+			node->_prev = this->_prev;
+			this->_prev->_next = node;
+		}
+		node->_next = this;
+		this->_prev = node;
+	}
+
+	void insert_after(Node* node)
+	{
+		if (this->_next)
+		{
+			node->_next = this->_next;
+			this->_next->_prev = node;
+		}
+		node->_prev = this;
+		this->_next = node;
+	}
+
+	void reverse(void)
+	{
+		Node<T> *tmp = this->_prev;
+		this->_prev = this->_next;
+		this->_next = tmp;
+	}
+
+	void disconnect()
+	{
+		if (this->_prev)
+			this->_prev->_next = this->_next;
+		if (this->_next)
+			this->_next->_prev = this->_prev;
+	}
 
 };
 
-// template<>
-void swap(Node& x, Node& y)
-{
-	if (x.next() != &x)
-	{
-		if (y.next() != &y)
-		{
-			ft::swap(x.next(), y.next());
-			ft::swap(x.previous(), y.previous());
-			x.next()->previous() = x.previous()->next() = &x;
-			y.next()->previous() = y.previous()->next() = &y;
-		}
-		else
-		{
-			y.next() = x.next();
-			y.previous() = x.previous();
-			y.next()->previous() = y.previous()->next() = &y;
-			x.next() = x.previous() = &x;
-		}
-	}
-	else if (y.next() != &y)
-	{
-		x.next() = y.next();
-		x.previous() = y.previous();
-		x.next()->previous() = x.previous()->next() = &x;
-		y.next() = y.previous() = &y;
-	}
-}
-
 template <class Iterator>
-class bidirectional_iterator
+class list_iterator
 {
 private:
 	typedef Node<Iterator>	Node;
@@ -129,50 +128,50 @@ public:
 	typedef T*								pointer;
 
 public:
-	bidirectional_iterator() : _node() {}
-	explicit bidirectional_iterator(Node* node) : _node(node) {}
+	list_iterator() : _node() {}
+	explicit list_iterator(Node* node) : _node(node) {}
 
-	bidirectional_iterator(const bidirectional_iterator<Iterator>& node) : _node(node._node)
+	list_iterator(const list_iterator<Iterator>& node) : _node(node._node)
 	{
 		*this = node;
 	}
 
-	bidirectional_iterator& operator=(const bidirectional_iterator<Iterator>& node)
+	list_iterator& operator=(const list_iterator<Iterator>& node)
 	{
 		if (*this != node)
 			this->_node = node._node;
 		return (*this);
 	}
 
-	~bidirectional_iterator() {}
+	~list_iterator() {}
 
 	reference operator*() const
 	{
 		return (static_cast<Node*>(this->_node)->getData());
 	}
 
-	bidirectional_iterator& operator++()
+	list_iterator& operator++()
 	{
 		this->_node = static_cast<Node*>(this->_node->next());
 		return (*this);
 	}
 
-	bidirectional_iterator operator++(int)
+	list_iterator operator++(int)
 	{
-		bidirectional_iterator tmp = *this;
+		list_iterator tmp = *this;
 		this->_node = static_cast<Node*>(this->_node->next());
 		return (tmp);
 	}
 
-	bidirectional_iterator& operator--()
+	list_iterator& operator--()
 	{
 		this->_node = static_cast<Node*>(this->_node->previous());
 		return (*this);
 	}
 
-	bidirectional_iterator operator--(int)
+	list_iterator operator--(int)
 	{
-		bidirectional_iterator tmp = *this;
+		list_iterator tmp = *this;
 		this->_node = static_cast<Node*>(this->_node->previous());
 		return (tmp);
 	}
@@ -189,13 +188,13 @@ public:
 };
 
 template <class T>
-bool operator==(const bidirectional_iterator<T>& lhs, const bidirectional_iterator<T>& rhs)
+bool operator==(const list_iterator<T>& lhs, const list_iterator<T>& rhs)
 {
 	return (lhs._node() == rhs._node());
 }
 
 template <class T>
-bool operator!=(const bidirectional_iterator<T>& lhs, const bidirectional_iterator<T>& rhs)
+bool operator!=(const list_iterator<T>& lhs, const list_iterator<T>& rhs)
 {
 	return (lhs._node() != rhs._node());
 }
