@@ -6,7 +6,7 @@
 /*   By: yohlee <yohlee@student.42seoul.kr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/31 15:32:47 by yohlee            #+#    #+#             */
-/*   Updated: 2020/11/03 09:12:14 by yohlee           ###   ########.fr       */
+/*   Updated: 2020/11/08 12:24:52 by yohlee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,12 +43,6 @@ Iterator next(Iterator it, unsigned long n = 1)
 	return (it);
 }
 
-template<class Iterator>
-typename iterator_traits<Iterator>::difference_type distance(Iterator first, Iterator last, typename ft::iterator_traits<Iterator>::iterator_category() = ft::random_access_iterator_tag)
-{
-	return (last - first);
-}
-
 template <class Iterator>
 class iterator_traits
 {
@@ -82,6 +76,12 @@ public:
 	typedef random_access_iterator_tag	iterator_category;
 };
 
+template<class Iterator>
+typename iterator_traits<Iterator>::difference_type distance(Iterator first, Iterator last, typename ft::iterator_traits<Iterator>::iterator_category() = ft::random_access_iterator_tag())
+{
+	return (last - first);
+}
+
 template <class Iterator>
 class random_access_iterator : public ft::iterator<ft::random_access_iterator_tag, Iterator>
 {
@@ -89,12 +89,12 @@ private:
 	Iterator _it;
 
 public:
-	typedef Iterator											iterator_type;
-	typedef ft::iterator_traits<Iterator>::iterator_category	iterator_category;
-	typedef ft::iterator_traits<Iterator>::value_type			value_type;
-	typedef ft::iterator_traits<Iterator>::difference_type		difference_type;
-	typedef ft::iterator_traits<Iterator>::reference			reference;
-	typedef ft::iterator_traits<Iterator>::pointer				pointer;
+	typedef Iterator													iterator_type;
+	typedef typename ft::iterator_traits<Iterator>::iterator_category	iterator_category;
+	typedef typename ft::iterator_traits<Iterator>::value_type			value_type;
+	typedef typename ft::iterator_traits<Iterator>::difference_type		difference_type;
+	typedef typename ft::iterator_traits<Iterator>::reference			reference;
+	typedef typename ft::iterator_traits<Iterator>::pointer				pointer;
 
 public:
 	random_access_iterator() : _it() {}
@@ -245,12 +245,12 @@ private:
 	Iterator _it;
 
 public:
-	typedef Iterator											iterator_type;
-	typedef ft::iterator_traits<Iterator>::iterator_category	iterator_category;
-	typedef ft::iterator_traits<Iterator>::value_type			value_type;
-	typedef ft::iterator_traits<Iterator>::difference_type		difference_type;
-	typedef ft::iterator_traits<Iterator>::pointer				pointer;
-	typedef ft::iterator_traits<Iterator>::reference			reference;
+	typedef Iterator													iterator_type;
+	typedef typename ft::iterator_traits<Iterator>::iterator_category	iterator_category;
+	typedef typename ft::iterator_traits<Iterator>::value_type			value_type;
+	typedef typename ft::iterator_traits<Iterator>::difference_type		difference_type;
+	typedef typename ft::iterator_traits<Iterator>::pointer				pointer;
+	typedef typename ft::iterator_traits<Iterator>::reference			reference;
 
 public:
 
