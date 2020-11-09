@@ -6,7 +6,7 @@
 /*   By: yohlee <yohlee@student.42seoul.kr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/30 19:16:14 by yohlee            #+#    #+#             */
-/*   Updated: 2020/11/09 13:07:03 by yohlee           ###   ########.fr       */
+/*   Updated: 2020/11/10 08:14:39 by yohlee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,30 +14,47 @@
 # define MAP_HPP
 
 # include <iostream>
+# include "Iterator.hpp"
 
 namespace ft
 {
 
-template < class Key, class T, class Compare = less<Key>, class Alloc = allocator<pair<const Key,T> >
+template <class T1, class T2>
+struct pair
+{
+	T1 first;
+	T2 second;
+};
+
+template <class Key>
+struct less
+{
+	bool operator()(const Key& x, const Key& y) const
+	{
+		return (x < y);
+	}
+};
+
+template < class Key, class T, class Compare = less<Key>, class Alloc = std::allocator<pair<const Key,T> > >
 class Map
 {
 public:
-	typedef key_type
-	typedef mapped_type
-	typedef value_type
-	typedef key_compare
-	typedef value_compare
-	typedef allocator_type
-	typedef reference
-	typedef const_reference	allocator_type::const_reference //	for the default allocator: const value_type&
-	typedef pointer	allocator_type::pointer //	for the default allocator: value_type*
-	typedef const_pointer	allocator_type::const_pointer //	for the default allocator: const value_type*
-	typedef iterator	// a bidirectional iterator to value_type	convertible to const_iterator
-	typedef const_iterator	// a bidirectional iterator to const value_type	
-	typedef reverse_iterator	reverse_iterator<iterator>
-	typedef const_reverse_iterator	reverse_iterator<const_iterator>
-	typedef difference_type //	a signed integral type, identical to: iterator_traits<iterator>::difference_type	usually the same as ptrdiff_t
-	typedef size_type //	an unsigned integral type that can represent any non-negative value of difference_type	usually the same as size_t
+	typedef Key key_type;
+	typedef T mapped_type;
+	typedef pair<const key_type, mapped_type> value_type;
+	typedef Compare key_compare;
+	// typedef  value_compare
+	typedef Alloc allocator_type;
+	typedef allocator_type::reference reference;
+	typedef allocator_type::const_reference const_reference;	//	for the default allocator: const value_type&
+	typedef allocator_type::pointer pointer; //	for the default allocator: value_type*
+	typedef allocator_type::const_pointer const_pointer; //	for the default allocator: const value_type*
+	typedef ft::bidirectional_iterator iterator;	// a bidirectional iterator to value_type	convertible to const_iterator
+	typedef const ft::bidirectional_iterator const_iterator;	// a bidirectional iterator to const value_type	
+	typedef ft::reverse_iterator<iterator> reverse_iterator;
+	typedef const ft::reverse_iterator<const_iterator> reverse_iterator;
+	typedef ft::iterator_traits<iterator>::difference_type difference_type; //	a signed integral type, identical to: iterator_traits<iterator>::difference_type	usually the same as ptrdiff_t
+	typedef size_t size_type; //	an unsigned integral type that can represent any non-negative value of difference_type	usually the same as size_t
 
 public:
 

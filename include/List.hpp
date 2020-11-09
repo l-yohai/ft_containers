@@ -6,7 +6,7 @@
 /*   By: yohlee <yohlee@student.42seoul.kr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/05 03:20:17 by yohlee            #+#    #+#             */
-/*   Updated: 2020/11/08 17:08:54 by yohlee           ###   ########.fr       */
+/*   Updated: 2020/11/10 07:37:54 by yohlee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ public:
 
 private:
 	allocator_type _allocator;
-	Node<T> *_node;
+	Node<T>* _node;
 	size_type _size;
 
 public:
@@ -47,16 +47,16 @@ public:
 	explicit List(const allocator_type& alloc = allocator_type()) : _allocator(alloc), _size(0)
 	{
 		this->_node = new Node<T>();
-		// this->_node->_prev = this->_node;
-		// this->_node->_next = this->_node;
+		this->_node->_prev = this->_node;
+		this->_node->_next = this->_node;
 	}
 
 	explicit List(size_type n, const value_type& val = value_type(), const allocator_type& alloc = allocator_type())
 	: _allocator(alloc), _size(0)
 	{
 		this->_node = new Node<T>();
-		// this->_node->_prev = this->_node;
-		// this->_node->_next = this->_node;
+		this->_node->_prev = this->_node;
+		this->_node->_next = this->_node;
 		insert(begin(), n, value);
 	}
 
@@ -65,16 +65,16 @@ public:
 	: _allocator(alloc), _size(0)
 	{
 		this->_node = new Node<T>();
-		// this->_node->_prev = this->_node;
-		// this->_node->_next = this->_node;
+		this->_node->_prev = this->_node;
+		this->_node->_next = this->_node;
 		insert(begin(), first, last);
 	}
 
 	List(const List& x) : _allocator(x._allocator), _size(x._size)
 	{
 		this->_node = new Node<T>();
-		// this->_node->_prev = this->_node;
-		// this->_node->_next = this->_node;
+		this->_node->_prev = this->_node;
+		this->_node->_next = this->_node;
 		insert(begin(), x.begin(), x.end());
 	}
 
@@ -117,47 +117,9 @@ public:
 		return (const_iterator(this->_node->_next));
 	}
 
-	const_iterator cbegin() const noexcept
-	{
-
-	}
-
-	const_iterator cend() const noexcept
-	{
-
-	}
-
 	void clear()
 	{
-
-	}
-
-	const_reverse_iterator crbegin() const noexcept
-	{
-
-	}
-
-	const_reverse_iterator crend() const noexcept
-	{
-
-	}
-
-	template <class... Args>
-	iterator emplace(const_iterator position, Args&&... args)
-	{
-
-	}
-
-	template <class... Args>
-	void emplace_back(Args&&... args)
-	{
-
-	}
-
-	template <class... Args>
-	void emplace_front(Args&&... args)
-	{
-
+		erase(begin(), end());
 	}
 
 	bool empty() const
@@ -200,11 +162,6 @@ public:
 	const_reference front() const
 	{
 		return (this->_node->_next->_data);
-	}
-
-	allocator_type get_allocator() const
-	{
-
 	}
 
 	// single element (1)
@@ -262,18 +219,40 @@ public:
 		return (std::numeric_limits<size_type>::max() / sizeof(Node<T>));
 	}
 
-	// (1)
 	void merge(List& x)
 	{
+		iterator i1 = begin();
+		iterator i2 = x.begin();
 
+		while (i1 != end() && i2 != x.end())
+		{
+			if (*i1 > *i2)
+				insert(i1, *it2++);
+			else
+				++i1;
+		}
+		if (i2 != x.end())
+			insert(end(), i2, x.end());
+		x.clear();
 	}
-	// (2)
+
 	template <class Compare>
 	void merge(List& x, Compare comp)
 	{
+		iterator i1 = begin();
+		iterator i2 = x.begin();
 
+		while (i1 != end() && i2 != x.end())
+		{
+			if (comp(*i2, *i1))
+				insert(i1, *it2++);
+			else
+				++i1;
+		}
+		if (i2 != x.end())
+			insert(end(), i2, x.end());
+		x.clear();
 	}
-
 
 	// copy (1)
 	List& operator=(const List& x)
@@ -316,13 +295,21 @@ public:
 
 	void remove(const value_type& val)
 	{
-
+		for (iterator it = begin(); it != end(); ++it)
+		{
+			if (*it == val)
+				it = erase(it);
+		}
 	}
 
 	template <class Predicate>
 	void remove_if(Predicate pred)
 	{
-
+		for (iterator it = begin(); it != end(); ++it)
+		{
+			if (pred(*it))
+				it = erase(it);
+		}
 	}
 
 	reverse_iterator rend()
@@ -337,12 +324,32 @@ public:
 
 	void resize(size_type n, value_type val = value_type())
 	{
-
+		int diff = n - this->len;
+		if (!diff)
+			return ;
+		else if (diff > 0)
+		{
+			for (int i = 0; i < diff; ++i)
+				push_back(val);
+		}
+		else
+		{
+			for (int i = 0; i < diff * (-1); ++i)
+				pop_back();
+		}
 	}
 
 	void reverse()
 	{
+		iterator i1 = begin();
+		iterator i2 = end()._node->prev;
 
+		for (size_t i = 1; i <= this->_size / 2; ++i)
+		{
+			swap(*i1, *i2);
+			++i1;
+			--i2;
+		}
 	}
 
 	size_type size() const
