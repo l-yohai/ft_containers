@@ -6,7 +6,7 @@
 /*   By: yohlee <yohlee@student.42seoul.kr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/11/11 08:24:51 by yohlee            #+#    #+#             */
-/*   Updated: 2020/11/11 09:31:05 by yohlee           ###   ########.fr       */
+/*   Updated: 2020/11/11 09:35:29 by yohlee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,14 +61,11 @@ public:
 	/*                                                                        */
 	/* ====================================================================== */
 
-	RedBlackTree()
-	{
-		this->_root = nullptr;
-	}
+	RedBlackTree() : _root(nullptr) {}
 
 	RedBlackTree(const RedBlackTree& other)
+	: _root(other._root)
 	{
-		this->_root = other._root;
 		*this = other;
 	}
 
@@ -161,7 +158,7 @@ public:
 	{
 		Node* node = new Node(value);
 		this->_root = insertBST(this->_root, node);
-		fixInsertRBTree(node);
+		fixInsertRedBlackTree(node);
 	}
 
 	void rotateLeft(Node*& node)
@@ -206,12 +203,14 @@ public:
 		node->_parent = left_child;
 	}
 
-	void fixInsertRBTree(Node*& node)
+	void fixInsertRedBlackTree(Node*& node)
 	{
 		Node *parent = nullptr;
 		Node *grandparent = nullptr;
 
-		while (node != _root && getColor(node) == Color::RED && getColor(node->_parent) == Color::RED)
+		while (node != _root &&
+				getColor(node) == Color::RED &&
+				getColor(node->_parent) == Color::RED)
 		{
 			parent = node->_parent;
 			grandparent = parent->_parent;
@@ -275,7 +274,7 @@ public:
 		setColor(this->_root, Color::BLACK);
 	}
 
-	void fixDeleteRBTree(Node*& node)
+	void fixDeleteRedBlackTree(Node*& node)
 	{
 		if (node == nullptr)
 			return;
@@ -286,7 +285,9 @@ public:
 			return;
 		}
 
-		if (getColor(node) == Color::RED || getColor(node->_left) == Color::RED || getColor(node->_right) == Color::RED)
+		if (getColor(node) == Color::RED ||
+			getColor(node->_left) == Color::RED ||
+			getColor(node->_right) == Color::RED)
 		{
 			Node *child = node->_left != nullptr ? node->_left : node->_right;
 
@@ -328,7 +329,8 @@ public:
 					}
 					else
 					{
-						if (getColor(sibling->_left) == Color::BLACK && getColor(sibling->_right) == Color::BLACK)
+						if (getColor(sibling->_left) == Color::BLACK &&
+							getColor(sibling->_right) == Color::BLACK)
 						{
 							setColor(sibling, Color::RED);
 							if (getColor(parent) == Color::RED)
@@ -365,7 +367,8 @@ public:
 					}
 					else
 					{
-						if (getColor(sibling->_left) == Color::BLACK && getColor(sibling->_right) == Color::BLACK)
+						if (getColor(sibling->_left) == Color::BLACK &&
+							getColor(sibling->_right) == Color::BLACK)
 						{
 							setColor(sibling, Color::RED);
 							if (getColor(parent) == Color::RED)
@@ -424,7 +427,7 @@ public:
 	void deleteValue(int value)
 	{
 		Node *node = deleteBST(this->_root, value);
-		fixDeleteRBTree(node);
+		fixDeleteRedBlackTree(node);
 	}
 
 	void inOrderBST(Node*& node)
@@ -582,11 +585,11 @@ public:
 			c->_parent = ptr_parent;
 			if (getColor(ptr_parent) == Color::RED)
 			{
-				fixInsertRBTree(c);
+				fixInsertRedBlackTree(c);
 			}
 			else if (getColor(ptr) == Color::RED)
 			{
-				fixInsertRBTree(ptr);
+				fixInsertRedBlackTree(ptr);
 			}
 
 			c->_value = temp;
@@ -611,9 +614,9 @@ public:
 
 			c->_parent = ptr_parent;
 			if (getColor(ptr_parent) == Color::RED)
-				fixInsertRBTree(c);
+				fixInsertRedBlackTree(c);
 			else if (getColor(ptr) == Color::RED)
-				fixInsertRBTree(ptr);
+				fixInsertRedBlackTree(ptr);
 
 			c->_value = temp;
 			this->_root = root1;
