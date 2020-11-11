@@ -60,6 +60,7 @@
 		"system_error": "cpp",
 		"tuple": "cpp",
 		"typeinfo": "cpp",
-		"bit": "cpp"
+		"bit": "cpp",
+		"__functional_03": "cpp"
 	}
 }
