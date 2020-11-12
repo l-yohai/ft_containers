@@ -6,7 +6,7 @@
 /*   By: yohlee <yohlee@student.42seoul.kr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/11/11 08:24:51 by yohlee            #+#    #+#             */
-/*   Updated: 2020/11/11 09:35:29 by yohlee           ###   ########.fr       */
+/*   Updated: 2020/11/11 20:00:10 by yohlee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,15 +52,6 @@ private:
 	Node* _root;
 
 public:
-	/* ====================================================================== */
-	/*           ___                _                   _                     */
-	/*          / __\___  _ __  ___| |_ _ __ _   _  ___| |_ ___  _ __         */
-	/*         / /  / _ \| '_ \/ __| __| '__| | | |/ __| __/ _ \| '__|        */
-	/*        / /__| (_) | | | \__ \ |_| |  | |_| | (__| || (_) | |           */
-	/*        \____/\___/|_| |_|___/\__|_|   \__,_|\___|\__\___/|_|           */
-	/*                                                                        */
-	/* ====================================================================== */
-
 	RedBlackTree() : _root(nullptr) {}
 
 	RedBlackTree(const RedBlackTree& other)
@@ -69,40 +60,13 @@ public:
 		*this = other;
 	}
 
-	/* ====================================================================== */
-	/*                  ___                 _                 _               */
-	/*                 /___\__   _____ _ __| | ___   __ _  __| |              */
-	/*                //  //\ \ / / _ \ '__| |/ _ \ / _` |/ _` |              */
-	/*               / \_//  \ V /  __/ |  | | (_) | (_| | (_| |              */
-	/*               \___/    \_/ \___|_|  |_|\___/ \__,_|\__,_|              */
-	/*                                                                        */
-	/* ====================================================================== */
-
 	RedBlackTree& operator=(const RedBlackTree& other)
 	{
 		this->_root = other._root;
 		return (*this);
 	}
 
-	/* ====================================================================== */
-	/*               ___          _                   _                       */
-	/*              /   \___  ___| |_ _ __ _   _  ___| |_ ___  _ __           */
-	/*             / /\ / _ \/ __| __| '__| | | |/ __| __/ _ \| '__|          */
-	/*            / /_//  __/\__ \ |_| |  | |_| | (__| || (_) | |             */
-	/*           /___,' \___||___/\__|_|   \__,_|\___|\__\___/|_|             */
-	/*                                                                        */
-	/* ====================================================================== */
-
 	~RedBlackTree() {}
-
-	/* ====================================================================== */
-	/*                          ___     _   _                                 */
-	/*                         / _ \___| |_| |_ ___ _ __                      */
-	/*                        / /_\/ _ \ __| __/ _ \ '__|                     */
-	/*                       / /_\\  __/ |_| ||  __/ |                        */
-	/*                       \____/\___|\__|\__\___|_|                        */
-	/*                                                                        */
-	/* ====================================================================== */
 
 	Color getColor(Node*& node)
 	{
@@ -111,30 +75,12 @@ public:
 		return (node->_color);
 	}
 
-	/* ====================================================================== */
-	/*                         __      _   _                                  */
-	/*                        / _\ ___| |_| |_ ___ _ __                       */
-	/*                        \ \ / _ \ __| __/ _ \ '__|                      */
-	/*                        _\ \  __/ |_| ||  __/ |                         */
-	/*                        \__/\___|\__|\__\___|_|                         */
-	/*                                                                        */
-	/* ====================================================================== */
-
 	void setColor(Node*& node, Color color)
 	{
 		if (!node)
 			return ;
 		node->_color = color;
 	}
-
-	/* ====================================================================== */
-	/*                                 _   _ _                                */
-	/*                           /\ /\| |_(_) |___                            */
-	/*                          / / \ \ __| | / __|                           */
-	/*                          \ \_/ / |_| | \__ \                           */
-	/*                           \___/ \__|_|_|___/                           */
-	/*                                                                        */
-	/* ====================================================================== */
 	
 	Node* insertBST(Node*& node, Node*& new_node)
 	{
@@ -624,6 +570,156 @@ public:
 		return;
 	}
 };
+
+template <class Iterator>
+class map_iterator : public ft::iterator<ft::bidirectional_iterator_tag, Iterator>
+{
+private:
+	RedBlackTree* _rbt;
+
+public:
+	typedef Iterator													iterator_type;
+	typedef typename ft::iterator_traits<Iterator>::iterator_category	iterator_category;
+	typedef typename ft::iterator_traits<Iterator>::value_type			value_type;
+	typedef typename ft::iterator_traits<Iterator>::difference_type		difference_type;
+	typedef typename ft::iterator_traits<Iterator>::reference			reference;
+	typedef typename ft::iterator_traits<Iterator>::pointer				pointer;
+
+public:
+	map_iterator() : _it() {}
+	explicit map_iterator(const Iterator& it) : _it(it) {}
+
+	map_iterator(const map_iterator<Iterator>& it) : _it(it._it)
+	{
+		*this = it;
+	}
+
+	map_iterator& operator=(const map_iterator<Iterator>& it)
+	{
+		this->_it = it._it;
+		return (*this);
+	}
+
+	~map_iterator() {}
+
+	iterator_type base() const
+	{
+		return (this->_it);
+	}
+
+	reference operator*() const
+	{
+		iterator_type it = this->_it;
+		return (*(--it));
+	}
+
+	map_iterator operator+(difference_type n) const
+	{
+		return (this->_it + n);
+	}
+
+	map_iterator& operator++()
+	{
+		++(this->_it);
+		return (*this);
+	}
+
+	map_iterator operator++(int)
+	{
+		map_iterator tmp = *this;
+		++(*this);
+		return (tmp);
+	}
+
+	map_iterator& operator+=(difference_type n)
+	{
+		map_iterator<iterator_type> it(*this);
+		it += n;
+		return (*this);
+	}
+
+	map_iterator operator-(difference_type n) const
+	{
+		return (this->_it - n);
+	}
+
+	map_iterator& operator--()
+	{
+		--(this->_it);
+		return (*this);
+	}
+
+	map_iterator operator--(int)
+	{
+		map_iterator tmp = *this;
+		--(this->_it);
+		return (tmp);
+	}
+
+	map_iterator& operator-=(difference_type n)
+	{
+		this->_it -= n;
+		return (*this);
+	}
+
+	pointer operator->() const
+	{
+		return (this->_it);
+	}
+
+	reference operator[](difference_type n) const
+	{
+		return (*(this->_it + n));
+	}
+};
+
+template <class Iterator>
+bool operator==(const map_iterator<Iterator>& lhs, const map_iterator<Iterator>& rhs)
+{
+	return (lhs.base() == rhs.base());
+}
+
+template <class Iterator>
+bool operator!=(const map_iterator<Iterator>& lhs, const map_iterator<Iterator>& rhs)
+{
+	return (lhs.base() != rhs.base());
+}
+
+template <class Iterator>
+bool operator<(const map_iterator<Iterator>& lhs, const map_iterator<Iterator>& rhs)
+{
+	return (lhs.base() < rhs.base());
+}
+
+template <class Iterator>
+bool operator<=(const map_iterator<Iterator>& lhs, const map_iterator<Iterator>& rhs)
+{
+	return (lhs.base() <= rhs.base());
+}
+
+template <class Iterator>
+bool operator>(const map_iterator<Iterator>& lhs, const map_iterator<Iterator>& rhs)
+{
+	return (lhs.base() > rhs.base());
+}
+
+template <class Iterator>
+bool operator>=(const map_iterator<Iterator>& lhs, const map_iterator<Iterator>& rhs)
+{
+	return (lhs.base() >= rhs.base());
+}
+
+template <class Iterator>
+typename map_iterator<Iterator>::difference_type operator-(const map_iterator<Iterator>& lhs, const map_iterator<Iterator>& rhs)
+{
+	return (lhs.base() + rhs.base());
+}
+
+template <class Iterator>
+map_iterator<Iterator> operator+(typename map_iterator<Iterator>::difference_type n, const map_iterator<Iterator>& rev_it)
+{
+	return (map_iterator<Iterator> (rev_it.base() - n));
+}
 
 }
 
