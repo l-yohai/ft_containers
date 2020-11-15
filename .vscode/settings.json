@@ -61,6 +61,13 @@
 		"tuple": "cpp",
 		"typeinfo": "cpp",
 		"bit": "cpp",
-		"__functional_03": "cpp"
+		"__functional_03": "cpp",
+		"__tree": "cpp",
+		"deque": "cpp",
+		"list": "cpp",
+		"map": "cpp",
+		"queue": "cpp",
+		"set": "cpp",
+		"stack": "cpp"
 	}
 }

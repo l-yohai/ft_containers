@@ -6,7 +6,7 @@
 /*   By: yohlee <yohlee@student.42seoul.kr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/11/01 14:30:14 by yohlee            #+#    #+#             */
-/*   Updated: 2020/11/08 12:50:33 by yohlee           ###   ########.fr       */
+/*   Updated: 2020/11/15 17:11:47 by yohlee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,10 +122,10 @@ private:
 
 public:
 	typedef ft::bidirectional_iterator_tag	iterator_category;
-	typedef T								value_type;
+	typedef Iterator								value_type;
 	typedef ptrdiff_t						difference_type;
-	typedef T&								reference;
-	typedef T*								pointer;
+	typedef Iterator&								reference;
+	typedef Iterator*								pointer;
 
 public:
 	list_iterator() : _node() {}
