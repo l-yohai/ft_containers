@@ -6,7 +6,7 @@
 /*   By: yohlee <yohlee@student.42seoul.kr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/11/11 08:24:51 by yohlee            #+#    #+#             */
-/*   Updated: 2020/11/15 17:58:55 by yohlee           ###   ########.fr       */
+/*   Updated: 2020/11/17 08:35:58 by yohlee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,24 +36,34 @@ private:
 	class Node
 	{
 	private:
-		int _value;
+		T _value;
 		Color _color;
 		Node* _left;
 		Node* _right;
 		Node* _parent;
+		bool _is_left;
 
 	public:
-		explicit Node(int value)
-		{
-			this->_value = value;
-			this->_color = Color::RED;
-			this->_left = nullptr;
-			this->_right = nullptr;
-			this->_parent = nullptr;
-		}
+		explicit Node(T value)
+		: _value(value), _color(Color::RED), _left(nullptr), _right(nullptr), _parent(nullptr), _is_left(true) {}
+
+		Node(const Node& node, Node* parent = 0)
+		: _value(node._value), _color(node._color), _left(node._left), _right(node._right), _parent(node._parent), _is_left(node._is_left) {}
 
 		virtual ~Node() {}
+
+		bool isRed(Node* node)
+		{
+			if (node == nullptr || node->_color != RED)
+				return (false);
+			return (true);
+		}
 	};
+
+private:
+	Node* _root;
+	size_t _size;
+	Compare _comp;
 
 public:
 	typedef Compare value_compare;
@@ -67,14 +77,11 @@ public:
 	typedef ptrdiff_t difference_type;
 	typedef size_t size_type;
 
-private:
-	Node* _root;
-
 public:
-	explicit RedBlackTree() : _root(nullptr) {}
+	explicit RedBlackTree(const Compare& comp) : _root(nullptr), _size(0), _comp(comp) {}
 
 	RedBlackTree(const RedBlackTree& other)
-	: _root(other._root)
+	: _root(other._root), _size(other._size), _comp(other._comp)
 	{
 		*this = other;
 	}
@@ -82,10 +89,15 @@ public:
 	RedBlackTree& operator=(const RedBlackTree& other)
 	{
 		this->_root = other._root;
+		this->_size = other._size;
+		this->_comp = other._comp;
 		return (*this);
 	}
 
-	~RedBlackTree() {}
+	~RedBlackTree()
+	{
+		this->clear();
+	}
 
 	void swap(RedBlackTree& tree)
 	{
@@ -94,6 +106,23 @@ public:
 		memcpy(buf, &tree, sizeof(RedBlackTree));
 		memcpy(reinterpret_cast<void *>(&tree), this, sizeof(RedBlackTree));
 		memcpy(reinterpret_cast<void *>(this), buf, sizeof(RedBlackTree));
+	}
+
+	size_t getSize() const
+	{
+		return (this->_size);
+	}
+
+	size_t getMaxSize() const
+	{
+		return (std::numeric_limits<difference_type>::max() / (sizeof(Node) / 2));
+	}
+
+	void clear()
+	{
+		this->deleteTree(this->_root);
+		this->_root = nullptr;
+		this->_size = 0;
 	}
 
 	Color getColor(Node*& node)
@@ -128,7 +157,7 @@ public:
 		return (node);
 	}
 	
-	void insertValue(int value)
+	void insertValue(T value)
 	{
 		Node* node = new Node(value);
 		this->_root = insertBST(this->_root, node);
@@ -398,7 +427,7 @@ public:
 		return deleteBST(node->_right, temp->_value);
 	}
 
-	void deleteValue(int value)
+	void deleteValue(T value)
 	{
 		Node* node = deleteBST(this->_root, value);
 		fixDeleteRedBlackTree(node);
