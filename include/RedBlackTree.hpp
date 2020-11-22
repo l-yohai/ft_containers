@@ -6,7 +6,7 @@
 /*   By: yohlee <yohlee@student.42seoul.kr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/11/11 08:24:51 by yohlee            #+#    #+#             */
-/*   Updated: 2020/11/17 08:35:58 by yohlee           ###   ########.fr       */
+/*   Updated: 2020/11/23 07:05:52 by yohlee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,6 @@ enum class Color
 {
 	RED,
 	BLACK,
-	DOUBLE_BLACK,
 };
 
 template <class T, class Compare>
@@ -78,554 +77,522 @@ public:
 	typedef size_t size_type;
 
 public:
-	explicit RedBlackTree(const Compare& comp) : _root(nullptr), _size(0), _comp(comp) {}
+	explicit RedBlackTree(const Compare &comp)
+	: _root(0), _size(0), _comp(comp) {}
 
-	RedBlackTree(const RedBlackTree& other)
-	: _root(other._root), _size(other._size), _comp(other._comp)
+	RedBlackTree(const RedBlackTree &x) : _root(0), _size(x._size), _comp(x._comp)
 	{
-		*this = other;
-	}
-
-	RedBlackTree& operator=(const RedBlackTree& other)
-	{
-		this->_root = other._root;
-		this->_size = other._size;
-		this->_comp = other._comp;
-		return (*this);
+		if (_size)
+		{
+			_root = new Node(*x._root);
+			copyTree(_root, x._root);
+		}
 	}
 
 	~RedBlackTree()
 	{
-		this->clear();
+		deleteTree(_root);
+		_root = 0;
+		_size = 0;
 	}
 
-	void swap(RedBlackTree& tree)
+	RedBlackTree &operator=(const RedBlackTree &x)
 	{
-		char buf[sizeof(RedBlackTree)];
-
-		memcpy(buf, &tree, sizeof(RedBlackTree));
-		memcpy(reinterpret_cast<void *>(&tree), this, sizeof(RedBlackTree));
-		memcpy(reinterpret_cast<void *>(this), buf, sizeof(RedBlackTree));
+		RedBlackTree ret(x);
+		swap(ret);
+		return *this;
 	}
 
-	size_t getSize() const
+	void swap(RedBlackTree &x)
 	{
-		return (this->_size);
-	}
+		char buffer[sizeof(RedBlackTree)];
 
-	size_t getMaxSize() const
-	{
-		return (std::numeric_limits<difference_type>::max() / (sizeof(Node) / 2));
+		memcpy(buffer, &x, sizeof(RedBlackTree));
+		memcpy(reinterpret_cast<char *>(&x), this, sizeof(RedBlackTree));
+		memcpy(reinterpret_cast<char *>(this), buffer, sizeof(RedBlackTree));
 	}
 
 	void clear()
 	{
-		this->deleteTree(this->_root);
-		this->_root = nullptr;
-		this->_size = 0;
+		deleteTree(_root);
+		_root = 0;
+		_size = 0;
 	}
 
-	Color getColor(Node*& node)
+	size_t size() const
 	{
-		if (!node)
-			return (Color::BLACK);
-		return (node->_color);
+		return (_size);
 	}
 
-	void setColor(Node*& node, Color color)
+	size_t max_size() const
 	{
-		if (!node)
+		return (std::numeric_limits<difference_type>::max() / (sizeof(Node) / 2));
+	}
+
+	Node *find(const value_type &k) const
+	{
+		return (find(_root, k));
+	}
+
+	Node *find(Node *node, const value_type &k) const
+	{
+		while (node)
+		{
+			if (!comp(node->_value, k) && !comp(k, node->_value))
+			{
+				iterator it(node, this);
+				iterator next(node, this);
+				for (--next; next._node && (!comp(*next, k) && !comp(k, *next)); --next)
+					--it;
+				return (it._node);
+			}
+			if (!comp(node->_value, k))
+				node = node->_left;
+			else
+				node = node->_right;
+		}
+		return (nullptr);
+	}
+
+	Node *lower_bound(const value_type &k) const
+	{
+		iterator it(min(), this);
+		while (it._node && comp(*it, k))
+			++it;
+		return (it._node);
+	}
+
+	Node *upper_bound(const value_type &k) const
+	{
+		iterator it(min(), this);
+		while (it._node && !comp(k, *it))
+			++it;
+		return (it._node);
+	}
+
+	size_type count(const value_type &k) const
+	{
+		size_type count = 0;
+
+		for (rb_tree_iterator<T, Compare> it(find(_root, k), this);
+			 it._node && !comp(*it, k) && !comp(k, *it); ++it)
+			++count;
+		return (count);
+	}
+
+	Node *add(value_type toAdd)
+	{
+		Node *added;  // sending address to this pointer so that I can select it even with the recursive
+
+		_root = add(0, _root, toAdd, true, &added);
+		_root->_color = Color::BLACK;
+		return (added);
+	}
+
+	Node *add(iterator it, value_type value) { return (add(it._node, value); )}
+
+	Node *add(Node *preceding, value_type value)
+	{
+		bool first = false;
+		iterator it(preceding, this);
+		while (it._node)
+		{
+			if (comp(value, *it))
+			{  // --> value < it
+				first = true;
+				--it;
+			}
+			else if (comp(*it, value))
+			{  // --> value > it
+				if (first)
+					break;
+				++it;
+			}
+			else
+			{
+				Node *added = new Node(value, it._node->_parent, it._node->_is_left);
+				if (added->_parent)
+					added->_is_left ? added->_parent->_left = added : added->_parent->_right = added;
+				else
+					_root = added;
+				added->_left = it._node->_left;
+				if (added->_left)
+					added->_left->_parent = added;
+				it._node->_left = 0;
+				it._node->_is_left = false;
+				added->_right = it._node;
+				it._node->_parent = added;
+				++_size;
+				return (added);
+			}
+		}
+		return (add(value));
+	}
+
+	Node *add(Node *parent, Node *x, value_type &value, bool left, Node **added)
+	{
+		if (x == 0)
+		{
+			++_size;
+			*added = new Node(value, parent, left);
+			return (*added);
+		}
+		if (!comp(x->_value, value) && !comp(value, x->_value) && allowMulti == false)	// ---> EQUAL
+			*added = x;
+		else if (!comp(value, x->_value))
+			x->_right = add(x, x->_right, value, false, added);
+		else
+			x->_left = add(x, x->_left, value, true, added);  // if comp gives false
+
+		if (isRed(x->_right) && !isRed(x->_left))
+			x = rotateLeft(x);
+		if (isRed(x->_left) && isRed(x->_left->_left))
+			x = rotateRight(x);
+		if (isRed(x->_left) && isRed(x->_right))
+			colorFlip(x);
+		return (x);
+	}
+
+	bool deleteKey(value_type value)
+	{
+		if (!find(_root, value))
+		{
+			return (false);
+		}
+		if (_size < 2)
+		{
+			_size = 0;
+			delete _root;
+			_root = nullptr;
+			return (true);
+		}
+		if (!isRed(_root->_left) && !isRed(_root->_right))
+			_root->_color = Color::RED;
+		_root = deleteKey(_root, value);
+		if (_root)
+			_root->_color = Color::BLACK;
+		return (true);
+	}
+
+	Node *deleteKey(Node *x, value_type &value)
+	{
+		if (comp(value, x->_value))
+		{
+			if (!isRed(x->_left) && x->_left && !isRed(x->_left->_left))
+				x = moveRedLeft(x);
+			x->_left = deleteKey(x->_left, value);
+		}
+		else
+		{
+			if (isRed(x->_left))
+				x = rotateRight(x);
+			if (!comp(x->_value, value) && !x->_right)
+			{  // EQUAL
+				--_size;
+				delete x;
+				return (0);
+			}
+			if (!isRed(x->_right) && x->_right && !isRed(x->_right->_left))
+				x = moveRedRight(x);
+			if (!comp(x->_value, value) && !comp(value, x->_value))
+			{
+				Node *h = min(x->_right);
+				x->_value = h->_value;
+				x->_right = deleteMin(x->_right);
+			}
+			else
+				x->_right = deleteKey(x->_right, value);
+		}
+		return (balance(x));
+	}
+
+	Node *deleteKey(iterator it)
+	{
+		return (deleteKey(it._node);)
+	}
+
+	Node *deleteKey(Node *x)
+	{
+		Node *ret = 0;
+		if (!x)
+			return (x);
+		if (_size == 1)
+			_root = 0;
+		else if (!x->_right)
+		{
+			if (!x->_parent)
+			{
+				_root = x->_left;
+				_root->_parent = 0;
+			}
+			else
+			{
+				(x->_is_left) ? x->_parent->_left = x->_left : x->_parent->_right = x->_left;
+				if (x->_left)
+				{
+					x->_left->_is_left = x->_is_left;
+					x->_left->_parent = x->_parent;
+				}
+				if (x->_is_left)
+					ret = x->_parent;
+				else
+				{
+					iterator it(x, this);
+					++it;
+					ret = it._node;
+				}
+			}
+		}
+		else
+			ret = eraseRight(x);
+		--_size;
+		delete x;
+		return (ret);
+	}
+
+	Node *eraseRight(Node *x)
+	{
+		Node *h = min(x->_right);
+
+		h->_is_left ? h->_parent->_left = h->_right : h->_parent->_right = h->_right;
+		if (h->_parent->_left)
+		{
+			h->_parent->_left->_parent = h->_parent;
+			h->_parent->_left->_is_left = true;
+		}
+		if (h->_parent->_right)
+			h->_parent->_right->_parent = h->_parent;
+		h->_is_left = x->_is_left;
+		h->_color = Color::x->_color;
+		h->_parent = x->_parent;
+		if (!h->_parent)
+			_root = h;
+		else
+			x->_is_left ? h->_parent->_left = h : h->_parent->_right = h;
+		if (x->_right)
+		{  // x->right wasn't h or it was but h had a right child
+			h->_right = x->_right;
+			h->_right->_parent = h;
+		}
+		h->_left = x->_left;
+		h->_left ? h->_left->_parent = h : 0;
+		return (h);
+	}
+
+	void deleteMin()
+	{
+		if (_root == 0)
 			return ;
-		node->_color = color;
+		if (!isRed(_root->_left && !isRed(_root->_right)))
+			_root->_color = Color::RED;
+		_root = deleteMin(_root);
+		if (_root)
+			_root->_color = Color::BLACK;
 	}
 
-	Node* insertBST(Node*& node, Node*& new_node)
+	Node *deleteMin(Node *h)
 	{
-		if (!node)
-			return (new_node);
-		if (new_node->_value < node->_value)
+		if (!h->_left)
 		{
-			node->_left = insertBST(node->_left, new_node);
-			node->_left->_parent = node;
+			// std::cout << "delete no left child "  << h->_value << std::endl;
+			--_size;
+			delete h;
+			return (0);
 		}
-		else if (new_node->_value > node->_value)
-		{
-			node->_right = insertBST(node->_right, new_node);
-			node->_right->_parent = node;
-		}
+		if (!isRed(h->_left) && !isRed(h->_left->_left))
+			h = moveRedLeft(h);
+		h->_left = deleteMin(h->_left);
+		return (balance(h));
+	}
 
+	void deleteMax()
+	{
+		// if (_root == 0) throw
+		if (_root == 0)
+			return ;
+		if (!isRed(_root->_left && !isRed(_root->_right)))
+			_root->_color = Color::RED;
+
+		_root = deleteMax(_root);
+		if (_root)
+			_root->_color = Color::BLACK;
+	}
+
+	Node *deleteMax(Node *h)
+	{
+		if (isRed(h->_left))
+			h = rotateRight(h);
+		if (h->_right == 0)
+		{
+			--_size;
+			delete h;
+			return (0);
+		}
+		if (!isRed(h->_right) && !isRed(h->_right->_left))
+			h = moveRedRight(h->_right);
+
+		h->_right = deleteMax(h->_right);
+		return (balance(h));
+	}
+
+	void colorFlip(Node *node)
+	{
+		node->_color = !node->_color;
+		node->_left->_color = !node->_left->_color;
+		node->_right->_color = !node->_right->_color;
+	}
+
+	Node *rotateLeft(Node *h)
+	{
+		Node *x = h->_right;
+		h->_right = x->_left;
+		if (h->_right)
+		{
+			h->_right->_parent = h;
+			h->_right->_is_left = false;
+		}
+		x->_parent = h->_parent;
+		x->_is_left = h->_is_left;
+		x->_color = h->_color;
+		x->_left = h;
+		h->_is_left = true;
+		h->_parent = x;
+		h->_color = Color::RED;
+		return (x);
+	}
+
+	Node *rotateRight(Node *h)
+	{
+		Node *x = h->_left;
+		h->_left = x->_right;
+		if (h->_left)
+		{
+			h->_left->_parent = h;
+			h->_left->_is_left = true;
+		}
+		x->_parent = h->_parent;
+		x->_is_left = h->_is_left;
+		x->_color = Color::h->_color;
+		x->_right = h;
+		h->_is_left = false;
+		h->_parent = x;
+		h->_color = Color::RED;
+		return (x);
+	}
+
+	Node *moveRedLeft(Node *h)
+	{
+		colorFlip(h);
+		if (isRed(h->_right->_left))
+		{
+			h->_right = rotateRight(h->_right);
+			h = rotateLeft(h);
+			colorFlip(h);
+		}
+		return (h);
+	}
+
+	Node *moveRedRight(Node *h)
+	{
+		colorFlip(h);
+		if (isRed(h->_left->_left))
+		{
+			h = rotateRight(h);
+			colorFlip(h);
+		}
+		return (h);
+	}
+
+	Node *balance(Node *h)
+	{
+		if (isRed(h->_right))
+			h = rotateLeft(h);
+		if (isRed(h->_left) && isRed(h->_left->_left))
+			h = rotateRight(h);
+		if (isRed(h->_left) && isRed(h->_right))
+			colorFlip(h);
+
+		return (h);
+	}
+
+	void deleteTree(Node *node)
+	{
+		if (node == 0)
+			return ;
+		deleteTree(node->_left);
+		deleteTree(node->_right);
+		delete node;
+	}
+
+	void copyTree(Node *dest, Node *src)
+	{
+		if (src->_left)
+		{
+			dest->_left = new Node(*src->_left, dest);
+			copyTree(dest->_left, src->_left);
+		}
+		if (src->_right)
+		{
+			dest->_right = new Node(*src->_right, dest);
+			copyTree(dest->_right, src->_right);
+		}
+	}
+
+	inline Node *min() const
+	{
+		return (min(_root));
+	}
+
+	inline Node *min(Node *node) const
+	{
+		while (node && node->_left)
+			node = node->_left;
 		return (node);
 	}
-	
-	void insertValue(T value)
+
+	inline Node *max() const
 	{
-		Node* node = new Node(value);
-		this->_root = insertBST(this->_root, node);
-		fixInsertRedBlackTree(node);
+		return (max(_root));
 	}
 
-	void rotateLeft(Node*& node)
+	inline Node *max(Node *node) const
 	{
-		Node* right_child = node->_right;
-		node->_right = right_child->_left;
-
-		if (node->_right != nullptr)
-			node->_right->_parent = node;
-
-		right_child->_parent = node->_parent;
-
-		if (node->_parent == nullptr)
-			this->_root = right_child;
-		else if (node == node->_parent->_left)
-			node->_parent->_left = right_child;
-		else
-			node->_parent->_right = right_child;
-
-		right_child->_left = node;
-		node->_parent = right_child;
+		while (node && node->_right)
+			node = node->_right;
+		return (node);
 	}
 
-	void rotateRight(Node*& node)
+	size_t heigth()
 	{
-		Node* left_child = node->_left;
-		node->_left = left_child->_right;
-
-		if (node->_left != nullptr)
-			node->_left->_parent = node;
-
-		left_child->_parent = node->_parent;
-
-		if (node->_parent == nullptr)
-			_root = left_child;
-		else if (node == node->_parent->_left)
-			node->_parent->_left = left_child;
-		else
-			node->_parent->_right = left_child;
-
-		left_child->_right = node;
-		node->_parent = left_child;
+		if (!_root)
+			return (0);
+		return (height(_root) - 1);
 	}
 
-	void fixInsertRedBlackTree(Node*& node)
+	size_t heigth(Node *node)
 	{
-		Node* parent = nullptr;
-		Node* grandparent = nullptr;
-
-		while (node != _root &&
-				getColor(node) == Color::RED &&
-				getColor(node->_parent) == Color::RED)
-		{
-			parent = node->_parent;
-			grandparent = parent->_parent;
-
-			if (parent == grandparent->_left)
-			{
-				Node* uncle = grandparent->_right;
-
-				if (getColor(uncle) == Color::RED)
-				{
-					setColor(uncle, Color::BLACK);
-					setColor(parent, Color::BLACK);
-					setColor(grandparent, Color::RED);
-
-					node = grandparent;
-				}
-				else
-				{
-					if (node == parent->_right)
-					{
-						rotateLeft(parent);
-						node = parent;
-						parent = node->_parent;
-					}
-
-					rotateRight(grandparent);
-					std::swap(parent->_color, grandparent->_color);
-
-					node = parent;
-				}
-			}
-			else
-			{
-				Node* uncle = grandparent->_left;
-
-				if (getColor(uncle) == Color::RED)
-				{
-					setColor(uncle, Color::BLACK);
-					setColor(parent, Color::BLACK);
-					setColor(grandparent, Color::RED);
-
-					node = grandparent;
-				}
-				else
-				{
-					if (node == parent->_left)
-					{
-						rotateRight(parent);
-
-						node = parent;
-						parent = node->_parent;
-					}
-
-					rotateLeft(grandparent);
-					std::swap(parent->_color, grandparent->_color);
-
-					node = parent;
-				}
-			}
-		}
-		setColor(this->_root, Color::BLACK);
+		if (node == 0)
+			return (0);
+		size_t left = height(node->_left);
+		size_t right = height(node->_right);
+		if (left > right)
+			return (left + 1);
+		return (right + 1);
 	}
 
-	void fixDeleteRedBlackTree(Node*& node)
+	int blackNodes(Node *node)
 	{
-		if (node == nullptr)
-			return;
-
-		if (node == this->_root)
-		{
-			this->_root = nullptr;
-			return;
-		}
-
-		if (getColor(node) == Color::RED ||
-			getColor(node->_left) == Color::RED ||
-			getColor(node->_right) == Color::RED)
-		{
-			Node* child = node->_left != nullptr ? node->_left : node->_right;
-
-			if (node == node->_parent->_left)
-			{
-				node->_parent->_left = child;
-				if (child != nullptr)
-					child->_parent = node->_parent;
-				setColor(child, Color::BLACK);
-				delete (node);
-			}
-			else
-			{
-				node->_parent->_right = child;
-				if (child != nullptr)
-					child->_parent = node->_parent;
-				setColor(child, Color::BLACK);
-				delete (node);
-			}
-		}
-		else
-		{
-			Node* sibling = nullptr;
-			Node* parent = nullptr;
-			Node* ptr = node;
-			setColor(ptr, Color::DOUBLE_BLACK);
-
-			while (ptr != this->_root && getColor(ptr) == Color::DOUBLE_BLACK)
-			{
-				parent = ptr->_parent;
-				if (ptr == parent->_left)
-				{
-					sibling = parent->_right;
-					if (getColor(sibling) == Color::RED)
-					{
-						setColor(sibling, Color::BLACK);
-						setColor(parent, Color::RED);
-						rotateLeft(parent);
-					}
-					else
-					{
-						if (getColor(sibling->_left) == Color::BLACK &&
-							getColor(sibling->_right) == Color::BLACK)
-						{
-							setColor(sibling, Color::RED);
-							if (getColor(parent) == Color::RED)
-								setColor(parent, Color::BLACK);
-							else
-								setColor(parent, Color::DOUBLE_BLACK);
-							ptr = parent;
-						}
-						else
-						{
-							if (getColor(sibling->_right) == Color::BLACK)
-							{
-								setColor(sibling->_left, Color::BLACK);
-								setColor(sibling, Color::RED);
-								rotateRight(sibling);
-								sibling = parent->_right;
-							}
-							setColor(sibling, parent->_color);
-							setColor(parent, Color::BLACK);
-							setColor(sibling->_right, Color::BLACK);
-							rotateLeft(parent);
-							break;
-						}
-					}
-				}
-				else
-				{
-					sibling = parent->_left;
-					if (getColor(sibling) == Color::RED)
-					{
-						setColor(sibling, Color::BLACK);
-						setColor(parent, Color::RED);
-						rotateRight(parent);
-					}
-					else
-					{
-						if (getColor(sibling->_left) == Color::BLACK &&
-							getColor(sibling->_right) == Color::BLACK)
-						{
-							setColor(sibling, Color::RED);
-							if (getColor(parent) == Color::RED)
-								setColor(parent, Color::BLACK);
-							else
-								setColor(parent, Color::DOUBLE_BLACK);
-							ptr = parent;
-						}
-						else
-						{
-							if (getColor(sibling->_left) == Color::BLACK)
-							{
-								setColor(sibling->_right, Color::BLACK);
-								setColor(sibling, Color::RED);
-								rotateLeft(sibling);
-								sibling = parent->_left;
-							}
-							setColor(sibling, parent->_color);
-							setColor(parent, Color::BLACK);
-							setColor(sibling->_left, Color::BLACK);
-							rotateRight(parent);
-							break;
-						}
-					}
-				}
-			}
-			if (node == node->_parent->_left)
-				node->_parent->_left = nullptr;
-			else
-				node->_parent->_right = nullptr;
-			delete (node);
-
-			setColor(this->_root, Color::BLACK);
-		}
+		if (node == 0)
+			return (1);
+		int left = blackNodes(node->_left);
+		int right = blackNodes(node->_right);
+		if (left < right)
+			fixUnevenBlack(node);
+		if (node->_color)
+			return (left + right);
+		return (left + right + 1);
 	}
 
-	Node* deleteBST(Node*& node, int value)
-	{
-		if (node == nullptr)
-			return node;
-
-		if (value < node->_value)
-			return deleteBST(node->_left, value);
-
-		if (value > node->_value)
-			return deleteBST(node->_right, value);
-
-		if (node->_left == nullptr || node->_right == nullptr)
-			return node;
-
-		Node* temp = minValueNode(node->_right);
-		node->_value = temp->_value;
-		return deleteBST(node->_right, temp->_value);
-	}
-
-	void deleteValue(T value)
-	{
-		Node* node = deleteBST(this->_root, value);
-		fixDeleteRedBlackTree(node);
-	}
-
-	void inOrderBST(Node*& node)
-	{
-		if (node == nullptr)
-			return;
-
-		inOrderBST(node->_left);
-		std::cout << node->_value << " " << static_cast<int>(node->_color) << std::endl;
-		inOrderBST(node->_right);
-	}
-
-	void inOrder()
-	{
-		inOrderBST(this->_root);
-	}
-
-
-	void preOrderBST(Node*& node)
-	{
-		if (node == nullptr)
-			return;
-
-		std::cout << node->_value << " " << static_cast<int>(node->_color) << std::endl;
-		preOrderBST(node->_left);
-		preOrderBST(node->_right);
-	}
-
-	void preOrder()
-	{
-		preOrderBST(this->_root);
-		std::cout << "---------" << std::endl;
-	}
-
-	Node* minValueNode(Node*& node)
-	{
-		Node* ptr = node;
-
-		while (ptr->_left != nullptr)
-			ptr = ptr->_left;
-
-		return ptr;
-	}
-
-	Node* maxValueNode(Node*& node)
-	{
-		Node* ptr = node;
-
-		while (ptr->_right != nullptr)
-			ptr = ptr->_right;
-
-		return ptr;
-	}
-
-	int getBlackHeight(Node* node)
-	{
-		int blackheight = 0;
-
-		while (node != nullptr)
-		{
-			if (getColor(node) == Color::BLACK)
-				blackheight++;
-			node = node->_left;
-		}
-		return blackheight;
-	}
-
-	void merge(RedBlackTree Tree2)
-	{
-		int temp;
-		Node* c, *temp_ptr;
-		Node* root1 = this->_root;
-		Node* root2 = Tree2._root;
-
-		int initialblackheight1 = getBlackHeight(root1);
-		int initialblackheight2 = getBlackHeight(root2);
-
-		if (initialblackheight1 > initialblackheight2)
-		{
-			c = maxValueNode(root1);
-			temp = c->_value;
-
-			deleteValue(c->_value);
-			root1 = this->_root;
-		}
-		else if (initialblackheight2 > initialblackheight1)
-		{
-			c = minValueNode(root2);
-			temp = c->_value;
-
-			Tree2.deleteValue(c->_value);
-			root2 = Tree2._root;
-		}
-		else
-		{
-			c = minValueNode(root2);
-			temp = c->_value;
-
-			Tree2.deleteValue(c->_value);
-			root2 = Tree2._root;
-
-			if (initialblackheight1 != getBlackHeight(root2))
-			{
-				Tree2.insertValue(c->_value);
-				root2 = Tree2._root;
-
-				c = maxValueNode(root1);
-				temp = c->_value;
-
-				deleteValue(c->_value);
-				root1 = this->_root;
-			}
-		}
-
-		setColor(c, Color::RED);
-
-		int finalblackheight1 = getBlackHeight(root1);
-		int finalblackheight2 = getBlackHeight(root2);
-
-		if (finalblackheight1 == finalblackheight2)
-		{
-			c->_left = root1;
-			root1->_parent = c;
-			c->_right = root2;
-			root2->_parent = c;
-			setColor(c, Color::BLACK);
-			c->_value = temp;
-			this->_root = c;
-		}
-		else if (finalblackheight2 > finalblackheight1)
-		{
-			Node* ptr = root2;
-
-			while (finalblackheight1 != getBlackHeight(ptr))
-			{
-				temp_ptr = ptr;
-				ptr = ptr->_left;
-			}
-
-			Node* ptr_parent;
-
-			if (ptr == nullptr)
-				ptr_parent = temp_ptr;
-			else
-				ptr_parent = ptr->_parent;
-
-			c->_left = root1;
-			if (root1 != nullptr)
-				root1->_parent = c;
-			c->_right = ptr;
-			if (ptr != nullptr)
-				ptr->_parent = c;
-			ptr_parent->_left = c;
-
-			c->_parent = ptr_parent;
-			if (getColor(ptr_parent) == Color::RED)
-			{
-				fixInsertRedBlackTree(c);
-			}
-			else if (getColor(ptr) == Color::RED)
-			{
-				fixInsertRedBlackTree(ptr);
-			}
-
-			c->_value = temp;
-			this->_root = root2;
-		}
-		else
-		{
-			Node* ptr = root1;
-
-			while (finalblackheight2 != getBlackHeight(ptr))
-			{
-				ptr = ptr->_right;
-			}
-
-			Node* ptr_parent = ptr->_parent;
-
-			c->_right = root2;
-			root2->_parent = c;
-			c->_left = ptr;
-			ptr->_parent = c;
-			ptr_parent->_right = c;
-
-			c->_parent = ptr_parent;
-			if (getColor(ptr_parent) == Color::RED)
-				fixInsertRedBlackTree(c);
-			else if (getColor(ptr) == Color::RED)
-				fixInsertRedBlackTree(ptr);
-
-			c->_value = temp;
-			this->_root = root1;
-		}
-		return;
-	}
 };
 
 template <class T, class Compare>
@@ -669,7 +636,7 @@ public:
 		}
 		else
 		{
-			while (this->_node && this->_node->_parent && !this->_node->isLeft)
+			while (this->_node && this->_node->_parent && !this->_node->_is_left)
 				this->_node = this->_node->_parent;
 			this->_node = this->_node->_parent;
 		}
@@ -696,7 +663,7 @@ public:
 		}
 		else
 		{
-			while (this->_node && this->_node->_parent && this->_node->isLeft)
+			while (this->_node && this->_node->_parent && this->_node->_is_left)
 				this->_node = this->_node->_parent;
 			this->_node = this->_node->_parent;
 		}

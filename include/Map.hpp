@@ -6,7 +6,7 @@
 /*   By: yohlee <yohlee@student.42seoul.kr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/30 19:16:14 by yohlee            #+#    #+#             */
-/*   Updated: 2020/11/17 08:35:56 by yohlee           ###   ########.fr       */
+/*   Updated: 2020/11/23 06:56:03 by yohlee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,7 +90,7 @@ public:
 	: _tree(value_compare(comp)), _comp(comp)
 	{
 		for (; first != last; fisrt++)
-			this->_tree.add(*first);
+			this->_tree.insertTree(*first);
 	}
 
 	Map(const Map& x) : _tree(x._tree), _comp(x._comp)
@@ -107,19 +107,22 @@ public:
 
 	mapped_type& operator[](const key_type& k)
 	{
-		return ((this->_tree.add(k))->_value.second);
+		return ((this->_tree.insertValue(k))->_value.second);
+		// return ((this->_tree.add(k))->_value.second);
 	}
 
 	~Map() {}
 
 	iterator begin()
 	{
-		return (iterator(this->_tree.min(), &(this->_tree)));
+		return (iterator(this->_tree.minValueNode(), &(this->_tree)));
+		// return (iterator(this->_tree.min(), &(this->_tree)));
 	}
 
 	const_iterator begin() const
 	{
-		return (const_iterator(this->_tree.min(), &(this->_tree)));
+		return (const_iterator(this->_tree.minValueNode(), &(this->_tree)));
+		// return (const_iterator(this->_tree.min(), &(this->_tree)));
 	}
 
 	iterator end()
@@ -179,35 +182,35 @@ public:
 
 	void erase(iterator position)
 	{
-		this->_tree.deleteKey(position->first);
+		this->_tree.deleteValue(position->first);
 	}
 
 	size_type erase(const key_type& k)
 	{
-		return (this->_tree.deleteKey(k));
+		return (this->_tree.deleteValue(k));
 	}
 
 	void erase(iterator first, iterator last)
 	{
-		whiel (first != end() && first != last && (last == end() || !comp(last->first, first->first)))
-			first = this->_tree.deleteKey(first);
+		while (first != end() && first != last && (last == end() || !this->_comp(last->first, first->first)))
+			first = this->_tree.deleteValue(first);
 	}
 
 	iterator find(const key_type& k)
 	{
-		return (iterator(this->_tree.found(k), &(this->_tree)));
+		return (iterator(this->_tree.find(k), &(this->_tree)));
 	}
 
 	const_iterator find(const key_type& k) const
 	{
-		return (const_iterator(this->_tree.found(k), &(this->_tree)));
+		return (const_iterator(this->_tree.find(k), &(this->_tree)));
 	}
 
 	allocator_type get_allocator() const;
 
 	pair<iterator, bool> insert(const value_type& val)
 	{
-		iterator tmp(this->_tree.add(val), &(this->_tree));
+		iterator tmp(this->_tree.insertValue(val), &(this->_tree));
 		return (pair<iterator, bool>(tmp, (tmp->second == val.second)));
 	}
 
@@ -220,7 +223,7 @@ public:
 	void insert(InputIterator first, InputIterator last)
 	{
 		while (first != last)
-			this->_tree.add(*first++);
+			this->_tree.insertTree(*first++);
 	}
 
 	key_compare key_comp() const
@@ -230,12 +233,12 @@ public:
 
 	iterator lower_bound(const key_type& k)
 	{
-		return (iterator(this->_tree.lower_bound(k), &(this->_tree)));
+		return (iterator(this->_tree.lowerBound(k), &(this->_tree)));
 	}
 
 	const_iterator lower_bound(const key_type& k) const
 	{
-		return (const_iterator(this->_tree.lower_bound(k), &(this->_tree)));
+		return (const_iterator(this->_tree.lowerBound(k), &(this->_tree)));
 	}
 
 	size_type max_size() const
@@ -252,12 +255,12 @@ public:
 
 	iterator upper_bound(const key_type& k)
 	{
-		return (iterator(this->_tree.upper_bound(k), &(this->_tree)));
+		return (iterator(this->_tree.upperBound(k), &(this->_tree)));
 	}
 
 	const_iterator upper_bound(const key_type& k) const
 	{
-		return (const_iterator(this->_tree.upper_bound(k), &(this->_tree)));
+		return (const_iterator(this->_tree.upperBound(k), &(this->_tree)));
 	}
 
 	value_compare value_comp() const
