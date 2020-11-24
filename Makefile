@@ -47,7 +47,7 @@ DIR_OBJS	=	./objs/
 
 # FILES #
 
-SRC			=	main.cpp
+SRC			=	main.cpp map.cpp
 SRCS		=	$(SRC)
 
 # COMPILED_SOURCES #

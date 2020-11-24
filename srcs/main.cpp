@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   main.cpp                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: yohlee <yohlee@student.42seoul.kr>         +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2020/11/25 06:32:36 by yohlee            #+#    #+#             */
+/*   Updated: 2020/11/25 06:32:38 by yohlee           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "Iterator.hpp"
 #include <iostream>
 #include <vector>
@@ -99,6 +111,36 @@ void reverse_iterator_base_test()
 
 int main()
 {
+	while (1)
+	{
+		system("clear");
+		print_title();
+		std::cout << "\033" << PURPLE << "\033[01m";
+		std::cout << "This is the test for ft_containers." << std::endl << std::endl;
+
+		std::cout << "\033[34m\033[01m";
+		std::cout << "Are you ready?" << std::endl;
+		std::cout << "\033[0m";
+
+		std::cout << "\033[35m\033[01m";
+		std::cout << "Input y(yes) or n(no)" << std::endl;
+		std::cout << "\033[0m";
+
+		char c;
+		std::cin >> c;
+		if (c == 'n')
+		{
+			std::cout << "\033[31m\033[01m";
+			std::cout << "===============================================" << std::endl;
+			std::cout << "test ended!" << std::endl;
+			std::cout << "===============================================" << std::endl;
+			std::cout << "\033[0m";
+			exit(0);
+		}
+		else if (c == 'y')
+			break ;
+	}
+
 	void (*f)();
 
 	std::vector<void (*)(void)> tests = {
