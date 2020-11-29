@@ -6,13 +6,14 @@
 /*   By: yohlee <yohlee@student.42seoul.kr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/11/25 06:32:28 by yohlee            #+#    #+#             */
-/*   Updated: 2020/11/25 06:44:37 by yohlee           ###   ########.fr       */
+/*   Updated: 2020/11/29 22:56:29 by yohlee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Iterator.hpp"
+#include "iterator.hpp"
 #include <iostream>
-#include "Map.hpp"
+#include "map.hpp"
+#include "utils.hpp"
 
 #define END			"[0m"
 #define BOLD		"[1m"
@@ -45,72 +46,72 @@ struct classcomp
 	}
 };
 
-// TEST(MapTest, Constructors)
+// TEST(mapTest, Constructors)
 void map_constroctor_test()
 {
-	ft::Map<char, int> first;
+	ft::map<char, int> first;
 
 	first['a'] = 10;
 	first['b'] = 30;
 	first['c'] = 50;
 	first['d'] = 70;
 
-	ft::Map<char, int> second(first.begin(), first.end());
+	ft::map<char, int> second(first.begin(), first.end());
 
-	ft::Map<char, int> third(second);
+	ft::map<char, int> third(second);
 
-	ft::Map<char, int, classcomp> fourth;	// class as Compare
+	ft::map<char, int, classcomp> fourth;	// class as Compare
 
 	EXPECT_EQ(first.size(), size_t(4));
 	EXPECT_EQ(second.size(), size_t(4));
 	EXPECT_EQ(third.size(), size_t(4));
 	EXPECT_EQ(fourth.size(), size_t(0));
 	bool (*fn_pt)(char, char) = fncomp;
-	ft::Map<char, int, bool (*)(char, char)> fifth(fn_pt);	 // function pointer as Compare
+	ft::map<char, int, bool (*)(char, char)> fifth(fn_pt);	 // function pointer as Compare
 }
 
-// TEST(MapTest, Assignment)
+// TEST(mapTest, Assignment)
 void map_assignment_test()
 {
-	ft::Map<char, int> first;
-	ft::Map<char, int> second;
+	ft::map<char, int> first;
+	ft::map<char, int> second;
 
 	first['x'] = 8;
 	first['y'] = 16;
 	first['z'] = 32;
 
 	second = first;						// second now contains 3 ints
-	first = ft::Map<char, int>();	// and first is now empty
+	first = ft::map<char, int>();	// and first is now empty
 
 	EXPECT_EQ(first.size(), size_t(0));
 	EXPECT_EQ(second.size(), size_t(3));
 }
 
-// TEST(MapTest, Begin)
+// TEST(mapTest, Begin)
 void map_begin_test()
 {
-	ft::Map<char, int> mymap;
+	ft::map<char, int> mymap;
 
 	mymap['b'] = 100;
 	mymap['a'] = 200;
 	mymap['c'] = 300;
 
 	char c = 'a';
-	for (ft::Map<char, int>::iterator it = mymap.begin(); it != mymap.end(); ++it)
+	for (ft::map<char, int>::iterator it = mymap.begin(); it != mymap.end(); ++it)
 		EXPECT_EQ(it->first, c++);
 }
 
-// TEST(MapTest, RBegin)
+// TEST(mapTest, RBegin)
 void map_rbegin_test()
 {
-	ft::Map<char, int> mymap;
+	ft::map<char, int> mymap;
 
 	mymap['x'] = 100;
 	mymap['y'] = 200;
 	mymap['z'] = 300;
 
 	int i = 300;
-	ft::Map<char, int>::reverse_iterator rit;
+	ft::map<char, int>::reverse_iterator rit;
 	for (rit = mymap.rbegin(); rit != mymap.rend(); ++rit)
 	{
 		EXPECT_EQ(rit->second, i);
@@ -118,10 +119,10 @@ void map_rbegin_test()
 	}
 }
 
-// TEST(MapTest, Empty)
+// TEST(mapTest, Empty)
 void map_empty_test()
 {
-	ft::Map<char, int> mymap;
+	ft::map<char, int> mymap;
 
 	mymap['a'] = 10;
 	mymap['b'] = 20;
@@ -135,10 +136,10 @@ void map_empty_test()
 	EXPECT_EQ(mymap.size(), size_t(0));
 }
 
-// TEST(MapTest, Size)
+// TEST(mapTest, Size)
 void map_size_test()
 {
-	ft::Map<char, int> mymap;
+	ft::map<char, int> mymap;
 	mymap['a'] = 101;
 	mymap['b'] = 202;
 	mymap['c'] = 302;
@@ -146,24 +147,24 @@ void map_size_test()
 	EXPECT_EQ(mymap.size(), size_t(3));
 }
 
-// TEST(MapTest, MaxSize)
+// TEST(mapTest, MaxSize)
 void map_max_size_test()
 {
-	ft::Map<int, int> mymap;
+	ft::map<int, int> mymap;
 	std::map<int, int> stdmap;
 	EXPECT_EQ(mymap.max_size(), stdmap.max_size());
-	ft::Map<double, double> mymap2;
+	ft::map<double, double> mymap2;
 	std::map<double, double> stdmap2;
 	EXPECT_EQ(mymap2.max_size(), stdmap2.max_size());
-	ft::Map<char, int> mymap3;
+	ft::map<char, int> mymap3;
 	std::map<char, int> stdmap3;
 	EXPECT_EQ(mymap3.max_size(), stdmap3.max_size());
 }
 
-// TEST(MapTest, Brackets)
+// TEST(mapTest, Brackets)
 void map_brackets_test()
 {
-	ft::Map<char, std::string> mymap;
+	ft::map<char, std::string> mymap;
 
 	mymap['a'] = "an element";
 	mymap['b'] = "another element";
@@ -179,26 +180,26 @@ void map_brackets_test()
 	EXPECT_EQ(mymap.size(), size_t(4));
 }
 
-// TEST(MapTest, Insert)
+// TEST(mapTest, Insert)
 void map_insert_test()
 {
-	ft::Map<char, int> mymap;
+	ft::map<char, int> mymap;
 
 	// first insert function version (single parameter):
 	mymap.insert(LIBRARY::pair<char, int>('a', 100));
 	mymap.insert(LIBRARY::pair<char, int>('z', 200));
 
-	LIBRARY::pair<ft::Map<char, int>::iterator, bool> ret;
+	LIBRARY::pair<ft::map<char, int>::iterator, bool> ret;
 	ret = mymap.insert(LIBRARY::pair<char, int>('z', 500));
 	EXPECT_FALSE(ret.second);
 
 	// second insert function version (with hint position):
-	ft::Map<char, int>::iterator it = mymap.begin();
+	ft::map<char, int>::iterator it = mymap.begin();
 	mymap.insert(it, LIBRARY::pair<char, int>('b', 300));  // max efficiency inserting
 	mymap.insert(it, LIBRARY::pair<char, int>('c', 400));  // no max efficiency inserting
 
 	// third insert function version (range insertion):
-	ft::Map<char, int> anothermap;
+	ft::map<char, int> anothermap;
 	anothermap.insert(mymap.begin(), mymap.find('c'));
 
 	// showing contents:
@@ -212,11 +213,11 @@ void map_insert_test()
 		EXPECT_EQ(it->first, c++);
 }
 
-// TEST(MapTest, Erase)
+// TEST(mapTest, Erase)
 void map_erase_test()
 {
-	ft::Map<char, int> mymap;
-	ft::Map<char, int>::iterator it;
+	ft::map<char, int> mymap;
+	ft::map<char, int>::iterator it;
 
 	// insert some values:
 	mymap['a'] = 10;
@@ -239,10 +240,10 @@ void map_erase_test()
 	EXPECT_EQ(mymap.size(), size_t(2));
 }
 
-// TEST(MapTest, Swap)
+// TEST(mapTest, Swap)
 void map_swap_test()
 {
-	ft::Map<char, int> foo, bar;
+	ft::map<char, int> foo, bar;
 
 	foo['x'] = 100;
 	foo['y'] = 200;
@@ -264,10 +265,10 @@ void map_swap_test()
 	EXPECT_EQ(bar.size(), size_t(3));
 }
 
-// TEST(MapTest, Clear)
+// TEST(mapTest, Clear)
 void map_clear_test()
 {
-	ft::Map<char, int> mymap;
+	ft::map<char, int> mymap;
 
 	mymap['x'] = 100;
 	mymap['y'] = 200;
@@ -280,12 +281,12 @@ void map_clear_test()
 	EXPECT_EQ(mymap.size(), size_t(2));
 }
 
-// TEST(MapTest, KeyComp)
+// TEST(mapTest, KeyComp)
 void map_key_comp_test()
 {
-	ft::Map<char, int> mymap;
+	ft::map<char, int> mymap;
 
-	ft::Map<char, int>::key_compare mycomp = mymap.key_comp();
+	ft::map<char, int>::key_compare mycomp = mymap.key_comp();
 
 	mymap['a'] = 100;
 	mymap['b'] = 200;
@@ -293,17 +294,17 @@ void map_key_comp_test()
 
 	char highest = mymap.rbegin()->first;  // key value of last element
 
-	ft::Map<char, int>::iterator it = mymap.begin();
+	ft::map<char, int>::iterator it = mymap.begin();
 	do
 	{
 	} while (mycomp((*it++).first, highest));
 	EXPECT_EQ(it, mymap.end());
 }
 
-// TEST(MapTest, ValComp)
+// TEST(mapTest, ValComp)
 void map_value_comp_test()
 {
-	ft::Map<char, int> mymap;
+	ft::map<char, int> mymap;
 
 	mymap['x'] = 1001;
 	mymap['y'] = 2002;
@@ -311,7 +312,7 @@ void map_value_comp_test()
 
 	LIBRARY::pair<char, int> highest = *mymap.rbegin();	 // last element
 
-	ft::Map<char, int>::iterator it = mymap.begin();
+	ft::map<char, int>::iterator it = mymap.begin();
 	do
 	{
 		// std::cout << it->first << " => " << it->second << '\n';
@@ -319,11 +320,11 @@ void map_value_comp_test()
 	EXPECT_EQ(it, mymap.end());
 }
 
-// TEST(MapTest, Find)
+// TEST(mapTest, Find)
 void map_find_test()
 {
-	ft::Map<char, int> mymap;
-	ft::Map<char, int>::iterator it;
+	ft::map<char, int> mymap;
+	ft::map<char, int>::iterator it;
 
 	mymap['a'] = 50;
 	mymap['b'] = 100;
@@ -342,10 +343,10 @@ void map_find_test()
 	EXPECT_EQ(mymap.size(), size_t(3));
 }
 
-// TEST(MapTest, Count)
+// TEST(mapTest, Count)
 void map_count_test()
 {
-	ft::Map<char, int> mymap;
+	ft::map<char, int> mymap;
 
 	mymap['a'] = 101;
 	mymap['c'] = 202;
@@ -356,11 +357,11 @@ void map_count_test()
 	EXPECT_TRUE(mymap.count('f'));
 }
 
-// TEST(MapTest, Bound)
+// TEST(mapTest, Bound)
 void map_bound_test()
 {
-	ft::Map<char, int> mymap;
-	ft::Map<char, int>::iterator itlow, itup;
+	ft::map<char, int> mymap;
+	ft::map<char, int>::iterator itlow, itup;
 
 	mymap['a'] = 20;
 	mymap['b'] = 40;
@@ -378,16 +379,16 @@ void map_bound_test()
 	EXPECT_TRUE(mymap.count('d'));
 }
 
-// TEST(MapTest, EqualRange)
+// TEST(mapTest, EqualRange)
 void map_equal_range_test()
 {
-	ft::Map<char, int> mymap;
+	ft::map<char, int> mymap;
 
 	mymap['a'] = 10;
 	mymap['b'] = 20;
 	mymap['c'] = 30;
 
-	LIBRARY::pair<ft::Map<char, int>::iterator, ft::Map<char, int>::iterator> ret;
+	LIBRARY::pair<ft::map<char, int>::iterator, ft::map<char, int>::iterator> ret;
 	ret = mymap.equal_range('b');
 	EXPECT_EQ(ret.first->first, 'b');
 	EXPECT_EQ(ret.first->second, 20);
@@ -399,10 +400,10 @@ void map_equal_range_test()
 	EXPECT_EQ(ret.second, mymap.end());
 }
 
-// TEST(MapTest, RelOps)
+// TEST(mapTest, RelOps)
 void map_rel_ops_test()
 {
-	ft::Map<char, int> foo, bar;
+	ft::map<char, int> foo, bar;
 	std::map<char, int> foo2, bar2;
 	foo['a'] = 100;
 	foo['b'] = 200;
@@ -413,7 +414,7 @@ void map_rel_ops_test()
 	foo2['b'] = 200;
 	bar2['a'] = 10;
 	bar2['z'] = 1000;
-	// for (ft::Map<char,int>::iterator it = bar.begin(); it != bar.end(); ++it)
+	// for (ft::map<char,int>::iterator it = bar.begin(); it != bar.end(); ++it)
 	//   std::cout << it->first << "=>" << it->second << " , ";
 	// std::cout << std::endl;
 	// for (std::map<char,int>::iterator it = bar2.begin(); it != bar2.end(); ++it)
@@ -429,14 +430,14 @@ void map_rel_ops_test()
 	EXPECT_TRUE(foo >= bar);
 }
 
-// TEST(MapTest, RelOpsCchudant)
+// TEST(mapTest, RelOpsCchudant)
 void map_relops_test()
 {
-	ft::Map<int, int> map;
+	ft::map<int, int> map;
 	map[0] = 50;
 	map[90] = 5;
 
-	ft::Map<int, int> map2;
+	ft::map<int, int> map2;
 	map2[0] = 50;
 	map2[90] = 5;
 	map2[2] = 80;
@@ -462,11 +463,11 @@ void map_relops_test()
 	EXPECT_TRUE(!(map2 <= map));
 }
 
-TEST(MapTest, Glagan)
+TEST(mapTest, Glagan)
 {
-	ft::Map<int, int> mp;
+	ft::map<int, int> mp;
 	std::map<int, int> stdmp;
-	ft::Map<int, int>::iterator it;
+	ft::map<int, int>::iterator it;
 	std::map<int, int>::iterator sit;
 	mp[5] = 42;
 	mp[7] = 28;
@@ -483,11 +484,11 @@ TEST(MapTest, Glagan)
 	EXPECT_EQ(mp[9], 44);
 }
 
-TEST(MapTest, Glagan2)
+TEST(mapTest, Glagan2)
 {
-	ft::Map<std::string, int> mp;
+	ft::map<std::string, int> mp;
 	std::map<std::string, int> stdmp;
-	ft::Map<std::string, int>::iterator it;
+	ft::map<std::string, int>::iterator it;
 	std::map<std::string, int>::iterator sit;
 
 	mp[std::string("hej")] = 1;
@@ -507,16 +508,16 @@ TEST(MapTest, Glagan2)
 	it = mp.find(std::string("hej"));
 }
 
-// TEST(MapTest, ConstIterator)
+// TEST(mapTest, ConstIterator)
 void map_const_iterator_test()
 {
-	ft::Map<int, int> map;	 // three ints with a value of 100
+	ft::map<int, int> map;	 // three ints with a value of 100
 	map[5] = 42;
 	map[7] = 28;
 	map[9] = 44;
-	ft::Map<int, int>::const_iterator it;
-	ft::Map<int, int>::const_iterator it3(it);
-	ft::Map<int, int>::iterator it2;
+	ft::map<int, int>::const_iterator it;
+	ft::map<int, int>::const_iterator it3(it);
+	ft::map<int, int>::iterator it2;
 
 	for (it = map.begin(); it != map.end(); ++it)
 	{
@@ -528,10 +529,10 @@ void map_const_iterator_test()
 	// it2 = it;
 }
 
-// TEST(MapTest, ReverseConstIterator)
+// TEST(mapTest, ReverseConstIterator)
 void map_reverse_iterator_test()
 {
-	ft::Map<int, int> map;	 // three ints with a value of 100
+	ft::map<int, int> map;	 // three ints with a value of 100
 	std::map<int, int> smap;	 // three ints with a value of 100
 	map[5] = 42;
 	map[7] = 28;
@@ -539,8 +540,8 @@ void map_reverse_iterator_test()
 	smap[5] = 42;
 	smap[7] = 28;
 	smap[9] = 44;
-	ft::Map<int, int>::const_reverse_iterator rit;
-	ft::Map<int, int>::const_reverse_iterator rit2(rit);
+	ft::map<int, int>::const_reverse_iterator rit;
+	ft::map<int, int>::const_reverse_iterator rit2(rit);
 	std::map<int, int>::const_reverse_iterator srit;
 
 	srit = smap.rbegin();

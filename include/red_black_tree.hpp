@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   RedBlackTree.hpp                                   :+:      :+:    :+:   */
+/*   red_black_tree.hpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: yohlee <yohlee@student.42seoul.kr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/11/11 08:24:51 by yohlee            #+#    #+#             */
-/*   Updated: 2020/11/25 06:31:51 by yohlee           ###   ########.fr       */
+/*   Updated: 2020/11/29 23:52:03 by yohlee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,50 +14,56 @@
 # define REDBLACKTREE_HPP
 
 # include <iostream>
-# include "Iterator.hpp"
+# include "iterator.hpp"
 
 namespace ft
 {
 
-template <class T, class Compare>
-class MapIterator;
+template <class T, class Compare, bool flag = false>
+class tree_iterator;
 
-enum class Color
+enum Color
 {
 	RED,
 	BLACK,
 };
 
 template <class T, class Compare>
-class RedBlackTree
+class red_black_tree
 {
 private:
-	class Node
+	template <class U, class Comp, bool flag>
+	friend class tree_iterator;
+
+	struct Node
 	{
-	private:
 		T _value;
+		Node *_parent;
+		Node *_left;
+		Node *_right;
 		Color _color;
-		Node* _left;
-		Node* _right;
-		Node* _parent;
 		bool _is_left;
 
-	public:
-		explicit Node(T value)
-		: _value(value), _color(Color::RED), _left(nullptr), _right(nullptr), _parent(nullptr), _is_left(true) {}
-
-		Node(const Node& node, Node* parent = 0)
-		: _value(node._value), _color(node._color), _left(node._left), _right(node._right), _parent(node._parent), _is_left(node._is_left) {}
-
-		virtual ~Node() {}
-
-		bool isRed(Node* node)
-		{
-			if (node == nullptr || node->_color != RED)
-				return (false);
-			return (true);
-		}
+		Node(T value, Node *_parent = 0, bool left = true, Color color = RED) : _value(value),
+																			   _parent(_parent),
+																			   _left(0),
+																			   _right(0),
+																			   _color(color),
+																			   _is_left(left) {}
+		Node(Node const &x, Node *parent = 0) : _value(x._value),
+												_parent(parent),
+												_left(0),
+												_right(0),
+												_color(x._color),
+												_is_left(x._is_left) {}
 	};
+
+	bool isRed(Node* node)
+	{
+		if (node == nullptr || node->_color != RED)
+			return (false);
+		return (true);
+	}
 
 private:
 	Node* _root;
@@ -71,16 +77,16 @@ public:
 	typedef const value_type &const_reference;
 	typedef value_type *pointer;
 	typedef const value_type *const_pointer;
-	typedef MapIterator<T, Compare> iterator;
-	typedef const MapIterator<T, Compare> const_iterator;
+	typedef tree_iterator<T, Compare> iterator;
+	typedef tree_iterator<T, Compare, true> const_iterator;
 	typedef ptrdiff_t difference_type;
 	typedef size_t size_type;
 
 public:
-	explicit RedBlackTree(const Compare &comp)
+	explicit red_black_tree(const Compare &comp)
 	: _root(0), _size(0), _comp(comp) {}
 
-	RedBlackTree(const RedBlackTree &x) : _root(0), _size(x._size), _comp(x._comp)
+	red_black_tree(const red_black_tree &x) : _root(0), _size(x._size), _comp(x._comp)
 	{
 		if (_size)
 		{
@@ -89,27 +95,27 @@ public:
 		}
 	}
 
-	~RedBlackTree()
+	~red_black_tree()
 	{
 		deleteTree(_root);
 		_root = 0;
 		_size = 0;
 	}
 
-	RedBlackTree &operator=(const RedBlackTree &x)
+	red_black_tree &operator=(const red_black_tree &x)
 	{
-		RedBlackTree ret(x);
+		red_black_tree ret(x);
 		swap(ret);
 		return *this;
 	}
 
-	void swap(RedBlackTree &x)
+	void swap(red_black_tree &x)
 	{
-		char buffer[sizeof(RedBlackTree)];
+		char buffer[sizeof(red_black_tree)];
 
-		memcpy(buffer, &x, sizeof(RedBlackTree));
-		memcpy(reinterpret_cast<char *>(&x), this, sizeof(RedBlackTree));
-		memcpy(reinterpret_cast<char *>(this), buffer, sizeof(RedBlackTree));
+		memcpy(buffer, &x, sizeof(red_black_tree));
+		memcpy(reinterpret_cast<char *>(&x), this, sizeof(red_black_tree));
+		memcpy(reinterpret_cast<char *>(this), buffer, sizeof(red_black_tree));
 	}
 
 	void clear()
@@ -138,15 +144,15 @@ public:
 	{
 		while (node)
 		{
-			if (!comp(node->_value, k) && !comp(k, node->_value))
+			if (!_comp(node->_value, k) && !_comp(k, node->_value))
 			{
 				iterator it(node, this);
 				iterator next(node, this);
-				for (--next; next._node && (!comp(*next, k) && !comp(k, *next)); --next)
+				for (--next; next._node && (!_comp(*next, k) && !_comp(k, *next)); --next)
 					--it;
 				return (it._node);
 			}
-			if (!comp(node->_value, k))
+			if (!_comp(node->_value, k))
 				node = node->_left;
 			else
 				node = node->_right;
@@ -157,7 +163,7 @@ public:
 	Node *lower_bound(const value_type &k) const
 	{
 		iterator it(min(), this);
-		while (it._node && comp(*it, k))
+		while (it._node && _comp(*it, k))
 			++it;
 		return (it._node);
 	}
@@ -165,7 +171,7 @@ public:
 	Node *upper_bound(const value_type &k) const
 	{
 		iterator it(min(), this);
-		while (it._node && !comp(k, *it))
+		while (it._node && !_comp(k, *it))
 			++it;
 		return (it._node);
 	}
@@ -174,22 +180,22 @@ public:
 	{
 		size_type count = 0;
 
-		for (rb_tree_iterator<T, Compare> it(find(_root, k), this);
-			 it._node && !comp(*it, k) && !comp(k, *it); ++it)
+		for (red_black_tree<T, Compare> it(find(_root, k), this);
+			 it._node && !_comp(*it, k) && !_comp(k, *it); ++it)
 			++count;
 		return (count);
 	}
 
 	Node *add(value_type toAdd)
 	{
-		Node *added;  // sending address to this pointer so that I can select it even with the recursive
+		Node *added;  // sending address to this pointer so that I can ft::is_const it even with the recursive
 
 		_root = add(0, _root, toAdd, true, &added);
-		_root->_color = Color::BLACK;
+		_root->_color = BLACK;
 		return (added);
 	}
 
-	Node *add(iterator it, value_type value) { return (add(it._node, value); )}
+	Node *add(iterator it, value_type value) { return (add(it._node, value)); }
 
 	Node *add(Node *preceding, value_type value)
 	{
@@ -197,12 +203,12 @@ public:
 		iterator it(preceding, this);
 		while (it._node)
 		{
-			if (comp(value, *it))
+			if (_comp(value, *it))
 			{  // --> value < it
 				first = true;
 				--it;
 			}
-			else if (comp(*it, value))
+			else if (_comp(*it, value))
 			{  // --> value > it
 				if (first)
 					break;
@@ -237,9 +243,9 @@ public:
 			*added = new Node(value, parent, left);
 			return (*added);
 		}
-		if (!comp(x->_value, value) && !comp(value, x->_value) && allowMulti == false)	// ---> EQUAL
+		if (!this->_comp(x->_value, value) && !this->_comp(value, x->_value))	// ---> EQUAL
 			*added = x;
-		else if (!comp(value, x->_value))
+		else if (!this->_comp(value, x->_value))
 			x->_right = add(x, x->_right, value, false, added);
 		else
 			x->_left = add(x, x->_left, value, true, added);  // if comp gives false
@@ -267,10 +273,10 @@ public:
 			return (true);
 		}
 		if (!isRed(_root->_left) && !isRed(_root->_right))
-			_root->_color = Color::RED;
+			_root->_color = RED;
 		_root = deleteKey(_root, value);
 		if (_root)
-			_root->_color = Color::BLACK;
+			_root->_color = BLACK;
 		return (true);
 	}
 
@@ -308,7 +314,7 @@ public:
 
 	Node *deleteKey(iterator it)
 	{
-		return (deleteKey(it._node);)
+		return (deleteKey(it._node));
 	}
 
 	Node *deleteKey(Node *x)
@@ -363,7 +369,7 @@ public:
 		if (h->_parent->_right)
 			h->_parent->_right->_parent = h->_parent;
 		h->_is_left = x->_is_left;
-		h->_color = Color::x->_color;
+		h->_color = x->_color;
 		h->_parent = x->_parent;
 		if (!h->_parent)
 			_root = h;
@@ -384,10 +390,10 @@ public:
 		if (_root == 0)
 			return ;
 		if (!isRed(_root->_left && !isRed(_root->_right)))
-			_root->_color = Color::RED;
+			_root->_color = RED;
 		_root = deleteMin(_root);
 		if (_root)
-			_root->_color = Color::BLACK;
+			_root->_color = BLACK;
 	}
 
 	Node *deleteMin(Node *h)
@@ -411,11 +417,11 @@ public:
 		if (_root == 0)
 			return ;
 		if (!isRed(_root->_left && !isRed(_root->_right)))
-			_root->_color = Color::RED;
+			_root->_color = RED;
 
 		_root = deleteMax(_root);
 		if (_root)
-			_root->_color = Color::BLACK;
+			_root->_color = BLACK;
 	}
 
 	Node *deleteMax(Node *h)
@@ -437,9 +443,20 @@ public:
 
 	void colorFlip(Node *node)
 	{
-		node->_color = !node->_color;
-		node->_left->_color = !node->_left->_color;
-		node->_right->_color = !node->_right->_color;
+		if (node->_color == RED)
+			node->_color = BLACK;
+		else
+			node->_color = RED;
+
+		if (node->_left->_color == RED)
+			node->_left->_color = BLACK;
+		else
+			node->_left->_color = RED;
+		
+		if (node->_right->_color == RED)
+			node->_right->_color = BLACK;
+		else
+			node->_right->_color = RED;
 	}
 
 	Node *rotateLeft(Node *h)
@@ -457,7 +474,7 @@ public:
 		x->_left = h;
 		h->_is_left = true;
 		h->_parent = x;
-		h->_color = Color::RED;
+		h->_color = RED;
 		return (x);
 	}
 
@@ -472,11 +489,11 @@ public:
 		}
 		x->_parent = h->_parent;
 		x->_is_left = h->_is_left;
-		x->_color = Color::h->_color;
+		x->_color = h->_color;
 		x->_right = h;
 		h->_is_left = false;
 		h->_parent = x;
-		h->_color = Color::RED;
+		h->_color = RED;
 		return (x);
 	}
 
@@ -515,7 +532,7 @@ public:
 		return (h);
 	}
 
-	void deleteTree(Node *node)
+	void deleteTree(Node* node)
 	{
 		if (node == 0)
 			return ;
@@ -595,36 +612,39 @@ public:
 
 };
 
-template <class T, class Compare>
-class MapIterator
+template <class T, class Compare, bool flag>
+class tree_iterator
 {
 private:
-	friend class RedBlackTree<T, Compare>;
-	typedef RedBlackTree<T, Compare>::Node Node;
-	typedef RedBlackTree<T, Compare> Tree;
+	friend class red_black_tree<T, Compare>;
+	friend class tree_iterator<T, Compare, false>;
+	friend class tree_iterator<T, Compare, true>;
+
+	typedef typename ft::is_const<flag, typename red_black_tree<T, Compare>::Node const, typename red_black_tree<T, Compare>::Node>::type Node;
+	typedef typename ft::is_const<flag, const red_black_tree<T, Compare>, red_black_tree<T, Compare> >::type Tree;
 
 	Node* _node;
-	Tree* _tree;
+	const Tree* _tree;
 
 public:
 	typedef ft::bidirectional_iterator_tag iterator_category;
 	typedef T value_type;
-	typedef T& reference;
-	typedef T* pointer;
+	typedef typename ft::is_const<flag, const T &, T &>::type reference;
+	typedef typename ft::is_const<flag, const T *, T *>::type pointer;
 	typedef ptrdiff_t difference_type;
 
-	MapIterator(Node* node, Tree const* tree) : _node(nullptr), _tree(nullptr) {}
+	tree_iterator(Node* node = 0, Tree const* tree = 0) : _node(node), _tree(tree) {}
 
-	MapIterator(MapIterator<T, Compare> const& other) : _node(other._node), _tree(other._tree) {}
+	tree_iterator(tree_iterator<T, Compare> const& other) : _node(other._node), _tree(other._tree) {}
 
-	MapIterator& operator=(MapIterator<T, Compare> const& other)
+	tree_iterator& operator=(tree_iterator<T, Compare> const& other)
 	{
-		MapIterator tmp(other);
+		tree_iterator tmp(other);
 		swap(tmp);
 		return (*this);
 	}
 
-	MapIterator& operator++()
+	tree_iterator& operator++()
 	{
 		if (this->_node == nullptr)
 			this->_node = this->_tree->min();
@@ -643,15 +663,15 @@ public:
 		return (*this);
 	}
 
-	MapIterator operator++(int)
+	tree_iterator operator++(int)
 	{
-		MapIterator tmp(*this);
+		tree_iterator tmp(*this);
 		operator++();
 
 		return (tmp);
 	}
 
-	MapIterator& operator--()
+	tree_iterator& operator--()
 	{
 		if (this->_node == 0)
 			this->_node = this->_tree->max();
@@ -670,9 +690,9 @@ public:
 		return (*this);
 	}
 
-	MapIterator operator--(int)
+	tree_iterator operator--(int)
 	{
-		MapIterator tmp(*this);
+		tree_iterator tmp(*this);
 		operator--();
 
 		return (tmp);
@@ -688,29 +708,29 @@ public:
 		return (&(this->_node->_value));
 	}
 
-	friend bool operator==(const MapIterator& lhs, const MapIterator& rhs)
+	friend bool operator==(const tree_iterator& lhs, const tree_iterator& rhs)
 	{
 		return lhs._node == rhs._node;
 	}
 
-	friend bool operator!=(const MapIterator& lhs, const MapIterator& rhs)
+	friend bool operator!=(const tree_iterator& lhs, const tree_iterator& rhs)
 	{
 		return lhs._node != rhs._node;
 	}
 
-	void swap(MapIterator& x)
+	void swap(tree_iterator& x)
 	{
-		char buf[sizeof(MapIterator)];
+		char buf[sizeof(tree_iterator)];
 
-		memcpy(buf, &x, sizeof(MapIterator));
-		memcpy(reinterpret_cast<void *>(&x), this, sizeof(MapIterator));
-		memcpy(reinterpret_cast<void *>(this), buf, sizeof(MapIterator));
+		memcpy(buf, &x, sizeof(tree_iterator));
+		memcpy(reinterpret_cast<void *>(&x), this, sizeof(tree_iterator));
+		memcpy(reinterpret_cast<void *>(this), buf, sizeof(tree_iterator));
 	}
 
 };
 
 template <class T, class Compare>
-void swap(ft::RedBlackTree<T, Compare> &a, ft::RedBlackTree<T, Compare> &b)
+void swap(ft::red_black_tree<T, Compare> &a, ft::red_black_tree<T, Compare> &b)
 {
 	a.swap(b);
 }

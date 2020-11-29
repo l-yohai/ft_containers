@@ -1,40 +1,36 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Queue.hpp                                          :+:      :+:    :+:   */
+/*   queue.hpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: yohlee <yohlee@student.42seoul.kr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/31 15:32:52 by yohlee            #+#    #+#             */
-/*   Updated: 2020/10/31 15:32:52 by yohlee           ###   ########.fr       */
+/*   Updated: 2020/11/29 16:31:09 by yohlee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef QUEUE_HPP
 # define QUEUE_HPP
 
-# include "List.hpp"
+# include "list.hpp"
 
 namespace ft
 {
 
-template <class T, class Container = List<T> >
-class Queue
+template <class T, class Container = ft::list<T> >
+class queue
 {
-private:
-	container_type _ctnr;
-
 public:
 	typedef T value_type;
 	typedef Container container_type;
 	typedef size_t size_type;
 
-public:
+protected:
+	container_type _ctnr;
 
-	explicit queue (const container_type& ctnr = container_type())
-	{
-		this->_ctnr = ctnr;
-	}
+public:
+	explicit queue(const container_type& ctnr = container_type()) : _ctnr(ctnr) {}
 
 	value_type& back()
 	{
@@ -45,9 +41,6 @@ public:
 	{
 		return (this->_ctnr.back());
 	}
-
-	// template <class... Args>
-	// void emplace (Args&&... args);
 
 	bool empty() const
 	{
@@ -71,7 +64,7 @@ public:
 
 	void push (const value_type& val)
 	{
-		this->_ctnr.push_back();
+		this->_ctnr.push_back(val);
 	}
 
 	size_type size() const
@@ -79,50 +72,41 @@ public:
 		return (this->_ctnr.size());
 	}
 
-	// void swap (queue& x) noexcept(/*see below*/);
-
-	template <class T, class Container>
-	bool operator==(const queue<T,Container>& lhs, const queue<T,Container>& rhs)
+	friend bool operator==(const queue& lhs, const queue& rhs)
 	{
-		return (lhs._ctnr == rhs.ctnr);
+		return (lhs._ctnr == rhs._ctnr);
 	}
 
-	template <class T, class Container>
-	bool operator!=(const queue<T,Container>& lhs, const queue<T,Container>& rhs)
+	friend bool operator<(const queue& lhs, const queue& rhs)
 	{
-		return (lhs._ctnr != rhs.ctnr);
+		return (lhs._ctnr < rhs._ctnr);
 	}
 
-	template <class T, class Container>
-	bool operator<(const queue<T,Container>& lhs, const queue<T,Container>& rhs)
-	{
-		return (lhs._ctnr < rhs.ctnr);
-	}
-
-	template <class T, class Container>
-	bool operator<=(const queue<T,Container>& lhs, const queue<T,Container>& rhs)
-	{
-		return (lhs._ctnr <= rhs.ctnr);
-	}
-
-	template <class T, class Container>
-	bool operator> (const queue<T,Container>& lhs, const queue<T,Container>& rhs)
-	{
-		return (lhs._ctnr > rhs.ctnr);
-	}
-
-	template <class T, class Container>
-	bool operator>=(const queue<T,Container>& lhs, const queue<T,Container>& rhs)
-	{
-		return (lhs._ctnr >= rhs.ctnr);
-	}
-
-	// template <class T, class Container>
-	// void swap(queue<T,Container>& x, queue<T,Container>& y) noexcept(noexcept(x.swap(y)));
-
-	// template <class T, class Container, class Alloc>
-	// struct uses_allocator<queue<T,Container>,Alloc>;
 };
+
+template <class T, class Container>
+bool operator!=(const ft::queue<T,Container>& lhs, const ft::queue<T,Container>& rhs)
+{
+	return (!(lhs == rhs));
+}
+
+template <class T, class Container>
+bool operator<=(const ft::queue<T,Container>& lhs, const ft::queue<T,Container>& rhs)
+{
+	return (!(rhs < lhs));
+}
+
+template <class T, class Container>
+bool operator>(const ft::queue<T,Container>& lhs, const ft::queue<T,Container>& rhs)
+{
+	return (rhs < lhs);
+}
+
+template <class T, class Container>
+bool operator>=(const ft::queue<T,Container>& lhs, const ft::queue<T,Container>& rhs)
+{
+	return (!(lhs < rhs));
+}
 
 }
 

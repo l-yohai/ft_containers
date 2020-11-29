@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Test.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: skybt <skybt@student.42.fr>                +#+  +:+       +#+        */
+/*   By: yohlee <yohlee@student.42seoul.kr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/24 06:27:31 by cchudant          #+#    #+#             */
-/*   Updated: 2020/08/08 12:38:58 by skybt            ###   ########.fr       */
+/*   Updated: 2020/11/29 22:16:38 by yohlee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,15 +18,15 @@
 #include <iostream>
 #include <sstream>
 
-#include "../includes/deque.hpp"
-#include "../includes/list.hpp"
-#include "../includes/map.hpp"
-#include "../includes/multimap.hpp"
-#include "../includes/multiset.hpp"
-#include "../includes/queue.hpp"
-#include "../includes/set.hpp"
-#include "../includes/stack.hpp"
-#include "../includes/vector.hpp"
+// #include "../include/deque.hpp"
+#include "../include/list.hpp"
+#include "../include/map.hpp"
+// #include "../include/multimap.hpp"
+// #include "../include/multiset.hpp"
+#include "../include/queue.hpp"
+// #include "../include/set.hpp"
+#include "../include/stack.hpp"
+#include "../include/vector.hpp"
 
 class ConstrCounter
 {
@@ -54,13 +54,13 @@ bool operator>=(const ConstrCounter &lhs, const ConstrCounter &rhs);
 void test_one(std::string name, void (&fn)());
 
 void test_vector();
-void test_list();
 void test_stack();
+void test_list();
 void test_queue();
 void test_map();
-void test_set();
-void test_multimap();
-void test_multiset();
-void test_deque();
+// void test_set();
+// void test_multimap();
+// void test_multiset();
+// void test_deque();
 
 #endif
