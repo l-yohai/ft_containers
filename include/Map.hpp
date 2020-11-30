@@ -6,7 +6,7 @@
 /*   By: yohlee <yohlee@student.42seoul.kr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/30 19:16:14 by yohlee            #+#    #+#             */
-/*   Updated: 2020/12/01 00:36:05 by yohlee           ###   ########.fr       */
+/*   Updated: 2020/12/01 00:58:39 by yohlee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,7 +69,7 @@ public:
 	: _tree(value_compare(comp)), _comp(comp)
 	{
 		for (; first != last; first++)
-			this->_tree.add(*first);
+			this->_tree.insert(*first);
 	}
 
 	map(const map& x) : _tree(x._tree), _comp(x._comp)
@@ -86,7 +86,7 @@ public:
 
 	mapped_type& operator[](const key_type& k)
 	{
-		return ((this->_tree.add(k))->_value.second);
+		return ((this->_tree.insert(k))->_value.second);
 	}
 
 	~map() {}
@@ -138,7 +138,7 @@ public:
 
 	size_type count(const key_type& k) const
 	{
-		return ((this->_tree.find(k)) ? 1 : 0);
+		return ((this->_tree.search(k)) ? 1 : 0);
 	}
 
 	bool empty() const
@@ -174,32 +174,32 @@ public:
 
 	iterator find(const key_type& k)
 	{
-		return (iterator(this->_tree.find(k), &(this->_tree)));
+		return (iterator(this->_tree.search(k), &(this->_tree)));
 	}
 
 	const_iterator find(const key_type& k) const
 	{
-		return (const_iterator(this->_tree.find(k), &(this->_tree)));
+		return (const_iterator(this->_tree.search(k), &(this->_tree)));
 	}
 
 	allocator_type get_allocator() const;
 
 	pair<iterator, bool> insert(const value_type& val)
 	{
-		iterator tmp(this->_tree.add(val), &(this->_tree));
+		iterator tmp(this->_tree.insert(val), &(this->_tree));
 		return (pair<iterator, bool>(tmp, (tmp->second == val.second)));
 	}
 
 	iterator insert(iterator position, const value_type& val)
 	{
-		return (iterator(this->_tree.add(position, val), &(this->_tree)));
+		return (iterator(this->_tree.insert(position, val), &(this->_tree)));
 	}
 
 	template <class InputIterator>
 	void insert(InputIterator first, InputIterator last)
 	{
 		while (first != last)
-			this->_tree.add(*first++);
+			this->_tree.insert(*first++);
 	}
 
 	key_compare key_comp() const

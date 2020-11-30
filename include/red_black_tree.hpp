@@ -6,7 +6,7 @@
 /*   By: yohlee <yohlee@student.42seoul.kr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/11/11 08:24:51 by yohlee            #+#    #+#             */
-/*   Updated: 2020/12/01 00:35:42 by yohlee           ###   ########.fr       */
+/*   Updated: 2020/12/01 01:03:53 by yohlee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ private:
 		Color _color;
 		bool _is_left;
 
-		Node(T value, Node* _parent = 0, bool left = true, Color color = RED) : _value(value), _parent(_parent), _left(0), _right(0), _color(color), _is_left(left) {}
+		Node(T value, Node* _parent = 0, bool is_left = true, Color color = RED) : _value(value), _parent(_parent), _left(0), _right(0), _color(color), _is_left(is_left) {}
 
 		Node(Node const& x, Node* parent = 0) : _value(x._value), _parent(parent), _left(0), _right(0), _color(x._color), _is_left(x._is_left) {}
 	};
@@ -82,37 +82,37 @@ public:
 		if (_size)
 		{
 			_root = new Node(*x._root);
-			copyTree(_root, x._root);
+			copy(_root, x._root);
 		}
+	}
+
+	RedBlackTree& operator=(const RedBlackTree& x)
+	{
+		RedBlackTree ret(x);
+		swap(ret);
+		return (*this);
 	}
 
 	~RedBlackTree()
 	{
 		deleteTree(_root);
-		_root = 0;
+		_root = nullptr;
 		_size = 0;
-	}
-
-	RedBlackTree &operator=(const RedBlackTree& x)
-	{
-		RedBlackTree ret(x);
-		swap(ret);
-		return *this;
 	}
 
 	void swap(RedBlackTree& x)
 	{
-		char buffer[sizeof(RedBlackTree)];
+		char buf[sizeof(RedBlackTree)];
 
-		memcpy(buffer, &x, sizeof(RedBlackTree));
+		memcpy(buf, &x, sizeof(RedBlackTree));
 		memcpy(reinterpret_cast<char *>(&x), this, sizeof(RedBlackTree));
-		memcpy(reinterpret_cast<char *>(this), buffer, sizeof(RedBlackTree));
+		memcpy(reinterpret_cast<char *>(this), buf, sizeof(RedBlackTree));
 	}
 
 	void clear()
 	{
 		deleteTree(_root);
-		_root = 0;
+		_root = nullptr;
 		_size = 0;
 	}
 
@@ -126,12 +126,12 @@ public:
 		return (std::numeric_limits<difference_type>::max() / (sizeof(Node) / 2));
 	}
 
-	Node* find(const value_type& key) const
+	Node* search(const value_type& key) const
 	{
-		return (find(_root, key));
+		return (search(_root, key));
 	}
 
-	Node* find(Node* node, const value_type& key) const
+	Node* search(Node* node, const value_type& key) const
 	{
 		while (node)
 		{
@@ -167,31 +167,21 @@ public:
 		return (it._node);
 	}
 
-	size_type count(const value_type& key) const
-	{
-		size_type count = 0;
-
-		for (RedBlackTree<T, Compare> it(find(_root, key), this);
-			 it._node && !_comp(*it, key) && !_comp(key, *it); ++it)
-			++count;
-		return (count);
-	}
-
-	Node* add(value_type toAdd)
+	Node* insert(value_type toAdd)
 	{
 		Node* added;
 
-		_root = add(0, _root, toAdd, true, &added);
+		_root = insert(0, _root, toAdd, true, &added);
 		_root->_color = BLACK;
 		return (added);
 	}
 
-	Node* add(iterator it, value_type value)
+	Node* insert(iterator it, value_type value)
 	{
-		return (add(it._node, value));
+		return (insert(it._node, value));
 	}
 
-	Node* add(Node* preceding, value_type value)
+	Node* insert(Node* preceding, value_type value)
 	{
 		bool first = false;
 		iterator it(preceding, this);
@@ -226,10 +216,10 @@ public:
 				return (added);
 			}
 		}
-		return (add(value));
+		return (insert(value));
 	}
 
-	Node* add(Node* parent, Node* x, value_type &value, bool left, Node* *added)
+	Node* insert(Node* parent, Node* x, value_type &value, bool left, Node* *added)
 	{
 		if (x == 0)
 		{
@@ -240,9 +230,9 @@ public:
 		if (!this->_comp(x->_value, value) && !this->_comp(value, x->_value))
 			*added = x;
 		else if (!this->_comp(value, x->_value))
-			x->_right = add(x, x->_right, value, false, added);
+			x->_right = insert(x, x->_right, value, false, added);
 		else
-			x->_left = add(x, x->_left, value, true, added);
+			x->_left = insert(x, x->_left, value, true, added);
 
 		if (isRed(x->_right) && !isRed(x->_left))
 			x = rotateLeft(x);
@@ -255,7 +245,7 @@ public:
 
 	bool deleteKey(value_type value)
 	{
-		if (!find(_root, value))
+		if (!search(_root, value))
 		{
 			return (false);
 		}
@@ -317,7 +307,7 @@ public:
 		if (!x)
 			return (x);
 		if (_size == 1)
-			_root = 0;
+			_root = nullptr;
 		else if (!x->_right)
 		{
 			if (!x->_parent)
@@ -533,17 +523,17 @@ public:
 		delete node;
 	}
 
-	void copyTree(Node* dest, Node* src)
+	void copy(Node* dest, Node* src)
 	{
 		if (src->_left)
 		{
 			dest->_left = new Node(*src->_left, dest);
-			copyTree(dest->_left, src->_left);
+			copy(dest->_left, src->_left);
 		}
 		if (src->_right)
 		{
 			dest->_right = new Node(*src->_right, dest);
-			copyTree(dest->_right, src->_right);
+			copy(dest->_right, src->_right);
 		}
 	}
 
@@ -569,37 +559,6 @@ public:
 		while (node && node->_right)
 			node = node->_right;
 		return (node);
-	}
-
-	size_t heigth()
-	{
-		if (!_root)
-			return (0);
-		return (height(_root) - 1);
-	}
-
-	size_t heigth(Node* node)
-	{
-		if (node == 0)
-			return (0);
-		size_t left = height(node->_left);
-		size_t right = height(node->_right);
-		if (left > right)
-			return (left + 1);
-		return (right + 1);
-	}
-
-	int blackNodes(Node* node)
-	{
-		if (node == 0)
-			return (1);
-		int left = blackNodes(node->_left);
-		int right = blackNodes(node->_right);
-		if (left < right)
-			fixUnevenBlack(node);
-		if (node->_color)
-			return (left + right);
-		return (left + right + 1);
 	}
 
 };

@@ -6,7 +6,7 @@
 /*   By: yohlee <yohlee@student.42seoul.kr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/11/29 13:33:41 by yohlee            #+#    #+#             */
-/*   Updated: 2020/11/30 23:59:21 by yohlee           ###   ########.fr       */
+/*   Updated: 2020/12/01 01:12:58 by yohlee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -764,18 +764,18 @@ public:
 
 	list_iterator(Node* node, Ctnr container) : _node(node), _ctnr(container) {}
 
-	list_iterator(list_iterator<T, flag> const &cpy) : _node(cpy._node), _ctnr(cpy._ctnr) {}
+	list_iterator(list_iterator<T, flag> const& other) : _node(other._node), _ctnr(other._ctnr) {}
 
-	list_iterator &operator=(list_iterator const &cpy)
+	list_iterator& operator=(list_iterator const& other)
 	{
-		list_iterator tmp(cpy);
+		list_iterator tmp(other);
 		swap(tmp);
 		return (*this);
 	}
 
 	~list_iterator() {}
 
-	list_iterator &operator++(void)
+	list_iterator& operator++(void)
 	{
 		if (_node)
 			_node = _node->_next;
@@ -794,7 +794,7 @@ public:
 		return (old);
 	}
 
-	list_iterator &operator--(void)
+	list_iterator& operator--(void)
 	{
 		if (_node)
 			_node = _node->_prev;
