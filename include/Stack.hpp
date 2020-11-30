@@ -6,7 +6,7 @@
 /*   By: yohlee <yohlee@student.42seoul.kr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/31 15:32:34 by yohlee            #+#    #+#             */
-/*   Updated: 2020/11/29 20:17:47 by yohlee           ###   ########.fr       */
+/*   Updated: 2020/12/01 00:03:40 by yohlee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ public:
 		this->_ctnr.push_back(val);
 	}
 
-	size_type size()const
+	size_type size() const
 	{
 		return (this->_ctnr.size());
 	}

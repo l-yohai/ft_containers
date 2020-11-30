@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   List.hpp                                           :+:      :+:    :+:   */
+/*   list.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: yohlee <yohlee@student.42seoul.kr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/11/29 13:33:41 by yohlee            #+#    #+#             */
-/*   Updated: 2020/11/30 00:30:17 by yohlee           ###   ########.fr       */
+/*   Updated: 2020/11/30 23:59:21 by yohlee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,13 +26,13 @@ template <class T>
 class ListNode
 {
 public:
-	ListNode* next;
-	ListNode* prev;
+	ListNode* _next;
+	ListNode* _prev;
 	T _value;
 
-	ListNode(T value = T()) : next(0), prev(0), _value(value) {}
-	ListNode(ListNode* next, ListNode* prev, T value) : next(next), prev(prev), _value(value) {}
-	ListNode(ListNode const& cpy) : next(cpy.next), prev(cpy.prev), _value(cpy.value) {}
+	ListNode(T value = T()) : _next(0), _prev(0), _value(value) {}
+	ListNode(ListNode* next, ListNode* prev, T value) : _next(next), _prev(prev), _value(value) {}
+	ListNode(ListNode const& other) : _next(other.next), _prev(other.prev), _value(other.value) {}
 };
 
 template <class T, class Alloc = std::allocator<T> >
@@ -71,14 +71,15 @@ public:
 		{
 			_start = new Node(0, 0, val);
 			Node* tmp;
-			Node* prev = _start;
+			Node* curr = _start;
 			while (--n)
 			{
-				tmp = new Node(0, prev, val);
-				prev->next = tmp;
-				prev = tmp;
+				tmp = new Node(0, 0, val);
+				tmp->_prev = curr;
+				curr->_next = tmp;
+				curr = tmp;
 			}
-			_last = prev;
+			_last = curr;
 		}
 	}
 
@@ -88,18 +89,19 @@ public:
 	{
 		if (start != last)
 		{
-			_size = 1;
 			_start = new Node(0, 0, *start);
+			_size = 1;
 			Node* tmp;
-			Node* prev = _start;
+			Node* curr = _start;
 			for (start = ++start; start != last; start++)
 			{
-				tmp = new Node(0, prev, *start);
-				prev->next = tmp;
-				prev = tmp;
+				tmp = new Node(0, 0, *start);
+				tmp->_prev = curr;
+				curr->_next = tmp;
+				curr = tmp;
 				_size++;
 			}
-			_last = prev;
+			_last = curr;
 		}
 	}
 
@@ -109,16 +111,17 @@ public:
 		{
 			_start = new Node(0, 0, x._start->_value);
 			Node* tmp;
-			Node* prev = _start;
-			Node* ctrav = x._start->next;
-			while (ctrav)
+			Node* curr = _start;
+			Node* next = x._start->_next;
+			while (next)
 			{
-				tmp = new Node(0, prev, ctrav->_value);
-				prev->next = tmp;
-				prev = tmp;
-				ctrav = ctrav->next;
+				tmp = new Node(0, 0, next->_value);
+				tmp->_prev = curr;
+				curr->_next = tmp;
+				curr = tmp;
+				next = next->_next;
 			}
-			_last = prev;
+			_last = curr;
 		}
 	}
 
@@ -131,73 +134,30 @@ public:
 
 	~list()
 	{
-		Node* prev;
+		Node* curr;
+
 		while (_start && _size)
 		{
-			prev = _start;
-			_start = _start->next;
-			delete prev;
+			curr = _start;
+			_start = _start->_next;
+			delete curr;
 		}
-		_start = _last = 0;
+		_start = nullptr;
+		_last = nullptr;
 		_size = 0;
 	}
 
-	size_type size() const
+	template <class InputIterator>
+	void assign(InputIterator start, InputIterator last)
 	{
-		return (_size);
+		list tmp(start, last);
+		swap(tmp);
 	}
 
-	size_type max_size() const 
+	void assign(size_t n, const value_type& val)
 	{
-		return (std::numeric_limits<difference_type>::max() / (sizeof(Node) / 2));
-	}
-
-	bool empty() const
-	{
-		return (!_size);
-	}
-
-	void resize(size_type n, value_type val = value_type())
-	{
-		Node* trav;
-
-		if (!n)
-			clear();
-		else if (empty())
-		{
-			list tmp(n, val);
-			swap(tmp);
-		}
-		else if (n < _size)
-		{
-			trav = _start;
-			while (n-- > 0)
-				trav = trav->next;
-			erase(iterator(trav), iterator(0));
-		}
-		else if (n > _size)
-		{
-			insert(iterator(0), n - _size, val);
-		}
-	}
-
-	void swap(list& x)
-	{
-		char buf[sizeof(list)];
-
-		memcpy(buf, &x, sizeof(list));
-		memcpy(reinterpret_cast<char *>(&x), this, sizeof(list));
-		memcpy(reinterpret_cast<char *>(this), buf, sizeof(list));
-	}
-
-	reference front()
-	{
-		return (_start->_value);
-	}
-
-	const_reference front() const
-	{
-		return (_start->_value);
+		list tmp(n, val);
+		swap(tmp);
 	}
 
 	reference back()
@@ -220,6 +180,25 @@ public:
 		return (const_iterator(_start, this));
 	}
 
+	void clear()
+	{
+		Node* curr;
+		while (_start)
+		{
+			curr = _start;
+			_start = _start->_next;
+			delete curr;
+		}
+		_start = nullptr;
+		_last = nullptr;
+		_size = 0;
+	}
+
+	bool empty() const
+	{
+		return (!_size);
+	}
+
 	iterator end()
 	{
 		return (iterator(0, this));
@@ -230,37 +209,40 @@ public:
 		return (const_iterator(0, this));
 	}
 
-	reverse_iterator rbegin()
+	iterator erase(iterator position)
 	{
-		return (reverse_iterator(end()));
+		if (position._node == 0)
+			return (position);
+		iterator ret(position);
+		ret++;
+		disconnect(position._node);
+		delete position._node;
+		return (ret);
 	}
 
-	const_reverse_iterator rbegin() const
+	iterator erase(iterator start, iterator last)
 	{
-		return (const_reverse_iterator(end()));
+		if (start == last)
+			return (start);
+		Node* target;
+		disconnect(start._node, last._node);
+		while (start._node != 0 && start != last)
+		{
+			target = start._node;
+			start++;
+			delete target;
+		}
+		return (last);
 	}
 
-	reverse_iterator rend()
+	reference front()
 	{
-		return (reverse_iterator(begin()));
+		return (_start->_value);
 	}
 
-	const_reverse_iterator rend() const
+	const_reference front() const
 	{
-		return (const_reverse_iterator(begin()));
-	}
-
-	template <class InputIterator>
-	void assign(InputIterator start, InputIterator last)
-	{
-		list tmp(start, last);
-		swap(tmp);
-	}
-
-	void assign(size_t n, const value_type& val)
-	{
-		list tmp(n, val);
-		swap(tmp);
+		return (_start->_value);
 	}
 
 	iterator insert(iterator position, const value_type& val)
@@ -273,21 +255,23 @@ public:
 		}
 		else if (position._node == _start)
 		{
-			tmp = new Node(_start, 0, val);
-			_start->prev = tmp;
+			tmp = new Node(0, 0, val);
+			_start->_prev = tmp;
+			tmp->_next = _start;
 			_start = tmp;
 		}
 		else if (!position._node)
 		{
-			tmp = new Node(0, _last, val);
-			_last->next = tmp;
+			tmp = new Node(0, 0, val);
+			_last->_next = tmp;
+			tmp->_prev = _last;
 			_last = tmp;
 		}
 		else
 		{
-			tmp = new Node(position._node, position._node->prev, val);
-			position._node->prev->next = tmp;
-			position._node->prev = tmp;
+			tmp = new Node(position._node, position._node->_prev, val);
+			position._node->_prev->_next = tmp;
+			position._node->_prev = tmp;
 		}
 		_size++;
 		position._node = tmp;
@@ -314,40 +298,49 @@ public:
 		}
 	}
 
-	iterator erase(iterator position)
+	void merge(list& x)
 	{
-		if (position._node == 0)
-			return (position);
-		iterator ret(position);
-		ret++;
-		disconnect(position._node);
-		delete position._node;
-		return (ret);
-	}
-
-	iterator erase(iterator start, iterator last)
-	{
-		if (start == last)
-			return (start);
-		Node* toDel;
-		disconnect(start._node, last._node);
-		while (start._node != 0 && start != last)
+		iterator a(_start, this);
+		iterator b(x._start, &x);
+		if (this == &x || x.empty())
+			return ;
+		if (empty())
 		{
-			toDel = start._node;
-			start++;
-			delete toDel;
+			swap(x);
+			return ;
 		}
-		return (last);
+		while (a._node != 0 && b._node != 0)
+		{
+			if (*b < *a)
+				splice(a, x, b++);
+			else
+				a++;
+		}
+		if (!x.empty())
+			splice(a, x, b, x.end());
 	}
 
-	void push_back(const value_type& val)
+	template <class Compare>
+	void merge(list& x, Compare comp)
 	{
-		_last = new Node(0, _last, val);
-		_size++;
-		if (_last->prev)
-			_last->prev->next = _last;
-		else
-			_start = _last;
+		iterator a(_start, this);
+		iterator b(x._start, &x);
+		if (this == &x || x.empty())
+			return ;
+		if (empty())
+		{
+			swap(x);
+			return ;
+		}
+		while (a._node != 0 && b._node != 0)
+		{
+			if (comp(*b, *a) > 0)
+				splice(a, x, b++);
+			else
+				a++;
+		}
+		if (!x.empty())
+			splice(a, x, b, x.end());
 	}
 
 	void pop_back()
@@ -357,16 +350,6 @@ public:
 		delete toDel;
 	}
 
-	void push_front(const value_type& val)
-	{
-		_start = new Node(_start, 0, val);
-		_size++;
-		if (_start->next)
-			_start->next->prev = _start;
-		else
-			_last = _start;
-	}
-
 	void pop_front()
 	{
 		Node* toDel = _start;
@@ -374,112 +357,34 @@ public:
 		delete toDel;
 	}
 
-	void clear()
+	void push_back(const value_type& val)
 	{
-		Node* prev;
-		while (_start)
-		{
-			prev = _start;
-			_start = _start->next;
-			delete prev;
-		}
-		_start = _last = 0;
-		_size = 0;
-	}
-
-	void splice(iterator position, list& x)
-	{
-		if (x.empty() || &x == this)
-			return ;
-		if (empty())
-		{
-			swap(x);
-			return ;
-		}
-		if (position._node == _start)
-		{
-			_start->prev = x._last;
-			x._last->next = _start;
-			_start = x._start;
-		}
-		else if (position._node == 0)
-		{
-			_last->next = x._start;
-			x._start->prev = _last;
-			_last = x._last;
-		}
-		else
-		{
-			position._node->prev->next = x._start;
-			x._start->prev = position._node->prev;
-			position._node->prev = x._last;
-			x._last->next = position._node;
-		}
-		_size += x._size;
-		x._start = x._last = 0;
-		x._size = 0;
-	}
-
-	void splice(iterator position, list& x, iterator i)
-	{
-		x.disconnect(i._node);
-
-		if (empty())
-		{
-			_start = _last = i._node;
-		}
-		else if (position._node == _start)
-		{
-			_start->prev = i._node;
-			i._node->next = _start;
-			_start = i._node;
-		}
-		else if (position._node == 0)
-		{
-			_last->next = i._node;
-			i._node->prev = _last;
-			_last = i._node;
-		}
-		else
-		{
-			i._node->next = position._node;
-			i._node->prev = position._node->prev;
-			i._node->prev->next = i._node;
-			i._node->next->prev = i._node;
-		}
+		_last = new Node(0, _last, val);
 		_size++;
+		if (_last->_prev)
+			_last->_prev->_next = _last;
+		else
+			_start = _last;
 	}
 
-	void splice(iterator position, list& x, iterator start, iterator last)
+	void push_front(const value_type& val)
 	{
-		if (!x._start || start == last)
-			return;
-		Node* nlast = (last._node) ? last._node->prev : x._last;
-		_size += x.disconnect(start._node, last._node);
-		if (empty())
-		{
-			_start = start._node;
-			_last = nlast;
-		}
-		else if (position._node == _start)
-		{
-			_start->prev = nlast;
-			nlast->next = _start;
-			_start = start._node;
-		}
-		else if (position._node == 0)
-		{
-			_last->next = start._node;
-			start._node->prev = _last;
-			_last = nlast;
-		}
+		_start = new Node(_start, 0, val);
+		_size++;
+		if (_start->_next)
+			_start->_next->_prev = _start;
 		else
-		{
-			position._node->prev->next = start._node;
-			start._node->prev = position._node->prev;
-			position._node->prev = nlast;
-			nlast->next = position._node;
-		}
+			_last = _start;
+	}
+
+	reverse_iterator rbegin()
+	{
+		return (reverse_iterator(end()));
+	}
+
+	const_reverse_iterator rbegin() const
+	{
+		return (const_reverse_iterator(end()));
 	}
 
 	void remove(const value_type& val)
@@ -505,6 +410,189 @@ public:
 			else
 				it++;
 		}
+	}
+
+	reverse_iterator rend()
+	{
+		return (reverse_iterator(begin()));
+	}
+
+	const_reverse_iterator rend() const
+	{
+		return (const_reverse_iterator(begin()));
+	}
+
+	void resize(size_type n, value_type val = value_type())
+	{
+		Node* curr;
+
+		if (!n)
+			clear();
+		else if (empty())
+		{
+			list tmp(n, val);
+			swap(tmp);
+		}
+		else if (n < _size)
+		{
+			curr = _start;
+			while (n-- > 0)
+				curr = curr->_next;
+			erase(iterator(curr), iterator(0));
+		}
+		else if (n > _size)
+			insert(iterator(0), n - _size, val);
+	}
+
+	void reverse()
+	{
+		iterator front(_start);
+		iterator back(_last);
+		while (front != back)
+		{
+			std::swap(*front, *back);
+			front++;
+			if (front == back)
+				break ;
+			back--;
+		}
+	}
+
+	size_type size() const
+	{
+		return (_size);
+	}
+
+	size_type max_size() const 
+	{
+		return (std::numeric_limits<difference_type>::max() / (sizeof(Node) / 2));
+	}
+
+	void sort()
+	{
+		if (_size < 2)
+			return ;
+		mergesort(&_start, ft::less<value_type>());
+		Node* trav;
+		for (trav = _last; trav && trav->_next; trav = trav->_next)
+			;
+		_last = trav;
+	}
+
+	template <class Compare>
+	void sort(Compare comp)
+	{
+		if (_size < 2)
+			return ;
+		mergesort(&_start, comp);
+		Node* trav;
+		for (trav = _last; trav && trav->_next; trav = trav->_next)
+			;
+		_last = trav;
+	}
+
+	void splice(iterator position, list& x)
+	{
+		if (x.empty() || &x == this)
+			return ;
+		if (empty())
+		{
+			swap(x);
+			return ;
+		}
+		if (position._node == _start)
+		{
+			_start->_prev = x._last;
+			x._last->_next = _start;
+			_start = x._start;
+		}
+		else if (position._node == 0)
+		{
+			_last->_next = x._start;
+			x._start->_prev = _last;
+			_last = x._last;
+		}
+		else
+		{
+			position._node->_prev->_next = x._start;
+			x._start->_prev = position._node->_prev;
+			position._node->_prev = x._last;
+			x._last->_next = position._node;
+		}
+		_size += x._size;
+		x._start = x._last = 0;
+		x._size = 0;
+	}
+
+	void splice(iterator position, list& x, iterator i)
+	{
+		x.disconnect(i._node);
+
+		if (empty())
+		{
+			_start = _last = i._node;
+		}
+		else if (position._node == _start)
+		{
+			_start->_prev = i._node;
+			i._node->_next = _start;
+			_start = i._node;
+		}
+		else if (position._node == 0)
+		{
+			_last->_next = i._node;
+			i._node->_prev = _last;
+			_last = i._node;
+		}
+		else
+		{
+			i._node->_next = position._node;
+			i._node->_prev = position._node->_prev;
+			i._node->_prev->_next = i._node;
+			i._node->_next->_prev = i._node;
+		}
+		_size++;
+	}
+
+	void splice(iterator position, list& x, iterator start, iterator last)
+	{
+		if (!x._start || start == last)
+			return ;
+		Node* nlast = (last._node) ? last._node->_prev : x._last;
+		_size += x.disconnect(start._node, last._node);
+		if (empty())
+		{
+			_start = start._node;
+			_last = nlast;
+		}
+		else if (position._node == _start)
+		{
+			_start->_prev = nlast;
+			nlast->_next = _start;
+			_start = start._node;
+		}
+		else if (position._node == 0)
+		{
+			_last->_next = start._node;
+			start._node->_prev = _last;
+			_last = nlast;
+		}
+		else
+		{
+			position._node->_prev->_next = start._node;
+			start._node->_prev = position._node->_prev;
+			position._node->_prev = nlast;
+			nlast->_next = position._node;
+		}
+	}
+
+	void swap(list& x)
+	{
+		char buf[sizeof(list)];
+
+		memcpy(buf, &x, sizeof(list));
+		memcpy(reinterpret_cast<char *>(&x), this, sizeof(list));
+		memcpy(reinterpret_cast<char *>(this), buf, sizeof(list));
 	}
 
 	void unique()
@@ -534,93 +622,11 @@ public:
 		}
 	}
 
-	void merge(list& x)
-	{
-		iterator a(_start, this);
-		iterator b(x._start, &x);
-		if (this == &x || x.empty())
-			return;
-		if (empty())
-		{
-			swap(x);
-			return;
-		}
-		while (a._node != 0 && b._node != 0)
-		{
-			if (*b < *a)
-				splice(a, x, b++);
-			else
-				a++;
-		}
-		if (!x.empty())
-			splice(a, x, b, x.end());
-	}
-
-	template <class Compare>
-	void merge(list& x, Compare comp)
-	{
-		iterator a(_start, this);
-		iterator b(x._start, &x);
-		if (this == &x || x.empty())
-			return;
-		if (empty())
-		{
-			swap(x);
-			return;
-		}
-		while (a._node != 0 && b._node != 0)
-		{
-			if (comp(*b, *a) > 0)
-				splice(a, x, b++);
-			else
-				a++;
-		}
-		if (!x.empty())
-			splice(a, x, b, x.end());
-	}
-
-	void sort()
-	{
-		if (_size < 2)
-			return;
-		mergesort(&_start, ft::less<value_type>());
-		Node* trav;
-		for (trav = _last; trav && trav->next; trav = trav->next)
-			;
-		_last = trav;
-	}
-
-	template <class Compare>
-	void sort(Compare comp)
-	{
-		if (_size < 2)
-			return;
-		mergesort(&_start, comp);
-		Node* trav;
-		for (trav = _last; trav && trav->next; trav = trav->next)
-			;
-		_last = trav;
-	}
-
-	void reverse()
-	{
-		iterator front(_start);
-		iterator back(_last);
-		while (front != back)
-		{
-			std::swap(*front, *back);
-			front++;
-			if (front == back)
-				break;
-			back--;
-		}
-	}
-
 private:
 	void disconnect(Node* position)
 	{
 		if (!position)
-			return;
+			return ;
 		_size--;
 		if (_size < 1)
 		{
@@ -628,26 +634,26 @@ private:
 		}
 		else if (position == _start)
 		{
-			_start = _start->next;
-			_start->prev = 0;
+			_start = _start->_next;
+			_start->_prev = 0;
 		}
 		else if (position == _last)
 		{
-			_last = _last->prev;
-			_last->next = 0;
+			_last = _last->_prev;
+			_last->_next = 0;
 		}
 		else
 		{
-			position->prev->next = position->next;
-			position->next->prev = position->prev;
+			position->_prev->_next = position->_next;
+			position->_next->_prev = position->_prev;
 		}
-		position->prev = position->next = 0;
+		position->_prev = position->_next = 0;
 	}
 
 	size_t disconnect(Node* start, Node* last)
 	{
 		size_t range_size = 0;
-		for (Node* trav = start; trav != last; trav = trav->next)
+		for (Node* trav = start; trav != last; trav = trav->_next)
 			range_size++;
 		if (range_size == _size || (start == _start && last == 0))
 		{
@@ -656,40 +662,40 @@ private:
 		else if (start == _start)
 		{
 			_start = last;
-			last->prev->next = 0;
-			_start->prev = 0;
+			last->_prev->_next = 0;
+			_start->_prev = 0;
 		}
 		else if (last == 0)
 		{
-			_last = start->prev;
-			_last->next = 0;
+			_last = start->_prev;
+			_last->_next = 0;
 		}
 		else
 		{
-			start->prev->next = last;
-			last->prev->next = 0;
-			last->prev = start->prev;
+			start->_prev->_next = last;
+			last->_prev->_next = 0;
+			last->_prev = start->_prev;
 		}
-		start->prev = 0;
+		start->_prev = 0;
 		_size -= range_size;
 		return (range_size);
 	}
 
 	Node* split_list(Node* start)
 	{
-		if (start->next != 0)
+		if (start->_next != 0)
 		{
-			for (Node* fast = start; fast != 0; fast = fast->next)
+			for (Node* fast = start; fast != 0; fast = fast->_next)
 			{
-				if (fast && fast->next)
+				if (fast && fast->_next)
 				{
-					fast = fast->next;
-					start = start->next;
+					fast = fast->_next;
+					start = start->_next;
 				}
 			}
 		}
-		if (start->prev)
-			start->prev->next = 0;
+		if (start->_prev)
+			start->_prev->_next = 0;
 		return (start);
 	}
 
@@ -708,16 +714,16 @@ private:
 		}
 		if (comp(a->_value, c->_value))
 		{
-			a->next = sort_merge(a->next, c, comp);
-			a->next->prev = a;
-			a->prev = 0;
+			a->_next = sort_merge(a->_next, c, comp);
+			a->_next->_prev = a;
+			a->_prev = 0;
 			return (a);
 		}
 		else
 		{
-			c->next = sort_merge(a, c->next, comp);
-			c->next->prev = c;
-			c->prev = 0;
+			c->_next = sort_merge(a, c->_next, comp);
+			c->_next->_prev = c;
+			c->_prev = 0;
 			return (c);
 		}
 	}
@@ -725,7 +731,7 @@ private:
 	template <typename Comp>
 	void mergesort(Node* *start, Comp comp)
 	{
-		if (!*start || !(*start)->next)
+		if (!*start || !(*start)->_next)
 			return ;
 		Node* middle = split_list(*start);
 		mergesort(start, comp);
@@ -772,7 +778,7 @@ public:
 	list_iterator &operator++(void)
 	{
 		if (_node)
-			_node = _node->next;
+			_node = _node->_next;
 		else if (_ctnr)
 			_node = _ctnr->_start;
 		return (*this);
@@ -782,7 +788,7 @@ public:
 	{
 		list_iterator old(*this);
 		if (_node)
-			_node = _node->next;
+			_node = _node->_next;
 		else if (_ctnr)
 			_node = _ctnr->_start;
 		return (old);
@@ -791,7 +797,7 @@ public:
 	list_iterator &operator--(void)
 	{
 		if (_node)
-			_node = _node->prev;
+			_node = _node->_prev;
 		else if (_ctnr)
 			_node = _ctnr->_last;
 		return (*this);
@@ -801,7 +807,7 @@ public:
 	{
 		list_iterator old(*this);
 		if (_node)
-			_node = _node->prev;
+			_node = _node->_prev;
 		else if (_ctnr)
 			_node = _ctnr->_last;
 		return (old);
