@@ -6,7 +6,7 @@
 /*   By: yohlee <yohlee@student.42seoul.kr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/30 19:16:14 by yohlee            #+#    #+#             */
-/*   Updated: 2020/11/29 22:56:53 by yohlee           ###   ########.fr       */
+/*   Updated: 2020/12/01 00:36:05 by yohlee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,15 +49,15 @@ public:
 	typedef const value_type& const_reference;
 	typedef value_type* pointer;
 	typedef const value_type* const_pointer;
-	typedef typename red_black_tree<pair<Key, T>, value_compare>::iterator iterator;
-	typedef typename red_black_tree<pair<Key, T>, value_compare>::const_iterator const_iterator;
+	typedef typename RedBlackTree<pair<Key, T>, value_compare>::iterator iterator;
+	typedef typename RedBlackTree<pair<Key, T>, value_compare>::const_iterator const_iterator;
 	typedef ft::reverse_iterator<iterator> reverse_iterator;
 	typedef ft::reverse_iterator<const_iterator> const_reverse_iterator;
 	typedef typename ft::iterator_traits<iterator>::difference_type difference_type;
 	typedef size_t size_type;
 
 private:
-	ft::red_black_tree<ft::pair<Key, T>, value_compare> _tree;
+	ft::RedBlackTree<ft::pair<Key, T>, value_compare> _tree;
 	Compare _comp;
 
 public:

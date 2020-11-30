@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Utils.hpp                                          :+:      :+:    :+:   */
+/*   utils.hpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: yohlee <yohlee@student.42seoul.kr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/11/10 07:17:41 by yohlee            #+#    #+#             */
-/*   Updated: 2020/11/29 13:35:04 by yohlee           ###   ########.fr       */
+/*   Updated: 2020/12/01 00:30:05 by yohlee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,12 +31,8 @@ struct pair
 	pair() : first(T1()), second(T2()) {}
 
 	template <class U1, class U2>
-	pair(const pair<U1, U2>& p) : first(p.first),
-								  second(p.second)
-	{
-	}
-	pair(const first_type& x, const second_type& y = T2()) : first(x),
-															 second(y) {}
+	pair(const pair<U1, U2>& p) : first(p.first), second(p.second) {}
+	pair(const first_type& x, const second_type& y = T2()) : first(x), second(y) {}
 
 	pair& operator=(const pair& x)
 	{
@@ -44,6 +40,7 @@ struct pair
 		second = x.second;
 		return *this;
 	}
+
 };
 
 template <class T1, class T2>
@@ -51,11 +48,13 @@ bool operator==(const pair<T1, T2>& lhs, const pair<T1, T2>& rhs)
 {
 	return lhs.first == rhs.first && lhs.second == rhs.second;
 }
+
 template <class T1, class T2>
 bool operator!=(const pair<T1, T2>& lhs, const pair<T1, T2>& rhs)
 {
 	return !(lhs == rhs);
 }
+
 template <class T1, class T2>
 bool operator<(const pair<T1, T2>& lhs, const pair<T1, T2>& rhs)
 {
@@ -63,16 +62,19 @@ bool operator<(const pair<T1, T2>& lhs, const pair<T1, T2>& rhs)
 		return true;
 	return lhs.first == rhs.first && lhs.second < rhs.second;
 }
+
 template <class T1, class T2>
 bool operator<=(const pair<T1, T2>& lhs, const pair<T1, T2>& rhs)
 {
 	return !(rhs < lhs);
 }
+
 template <class T1, class T2>
 bool operator>(const pair<T1, T2>& lhs, const pair<T1, T2>& rhs)
 {
 	return rhs < lhs;
 }
+
 template <class T1, class T2>
 bool operator>=(const pair<T1, T2>& lhs, const pair<T1, T2>& rhs)
 {
@@ -95,9 +97,7 @@ struct less
 };
 
 template <typename InputIterator, typename Compare>
-bool lexicographical_compare(InputIterator lhsBegin, InputIterator lhsEnd,
-							 InputIterator rhsBegin, InputIterator rhsEnd,
-							 const Compare& comp)
+bool lexicographical_compare(InputIterator lhsBegin, InputIterator lhsEnd, InputIterator rhsBegin, InputIterator rhsEnd, const Compare& comp)
 {
 	for (; lhsBegin != lhsEnd && rhsBegin != rhsEnd; ++lhsBegin, ++rhsBegin)
 	{
@@ -108,9 +108,9 @@ bool lexicographical_compare(InputIterator lhsBegin, InputIterator lhsEnd,
 	}
 	return lhsBegin == lhsEnd && rhsBegin != rhsEnd;
 }
+
 template <typename InputIterator>
-bool equal(InputIterator lhsBegin, InputIterator lhsEnd,
-		   InputIterator rhsBegin)
+bool equal(InputIterator lhsBegin, InputIterator lhsEnd, InputIterator rhsBegin)
 {
 	for (; lhsBegin != lhsEnd; ++lhsBegin, ++rhsBegin)
 	{
@@ -120,6 +120,6 @@ bool equal(InputIterator lhsBegin, InputIterator lhsEnd,
 	return true;
 }
 
-}  //namespace ft
+}
 
 #endif
