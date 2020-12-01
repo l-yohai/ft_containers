@@ -6,7 +6,7 @@
 /*   By: yohlee <yohlee@student.42seoul.kr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/30 19:16:14 by yohlee            #+#    #+#             */
-/*   Updated: 2020/12/01 00:58:39 by yohlee           ###   ########.fr       */
+/*   Updated: 2020/12/01 16:06:31 by yohlee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -158,18 +158,18 @@ public:
 
 	void erase(iterator position)
 	{
-		this->_tree.deleteValue(position->first);
+		this->_tree.deleteKey(position->first);
 	}
 
 	size_type erase(const key_type& k)
 	{
-		return (this->_tree.deleteValue(k));
+		return (this->_tree.deleteKey(k));
 	}
 
 	void erase(iterator first, iterator last)
 	{
 		while (first != end() && first != last && (last == end() || !this->_comp(last->first, first->first)))
-			first = this->_tree.deleteValue(first);
+			first = this->_tree.deleteKey(first);
 	}
 
 	iterator find(const key_type& k)
