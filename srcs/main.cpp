@@ -6,7 +6,7 @@
 /*   By: yohlee <yohlee@student.42seoul.kr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/11/25 06:32:36 by yohlee            #+#    #+#             */
-/*   Updated: 2020/12/01 23:38:21 by yohlee           ###   ########.fr       */
+/*   Updated: 2020/12/02 20:03:40 by yohlee           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@
 #include <string>
 #include <algorithm>
 #include <cstdlib>
+#include <cmath>
 #include <unistd.h>
 #include <iterator>
 #include <sys/types.h>
@@ -193,7 +194,6 @@ void vector_begin_test()
 	std::cout << "myvector contains: 1 2 3 4 5" << std::endl;
 }
 
-//TODO maxsize:
 void vector_capacity_test()
 {
 	ft::vector<int> myvector;
@@ -209,12 +209,11 @@ void vector_capacity_test()
 	print_result();
 	std::cout << "size: " << (int)myvector.size() << '\n';
 	std::cout << "capacity: " << (int)myvector.capacity() << '\n';
-	std::cout << "max_size: " << (int)myvector.max_size() << '\n';
 
 	print_answer();
 	std::cout << "size: 100" << std::endl;
 	std::cout << "capacity: 128" << std::endl;
-	std::cout << "max_size: 1073741823" << std::endl;
+
 }
 
 void vector_clear_test()
@@ -370,28 +369,6 @@ void vector_insert_test()
 
 	print_answer();
 	std::cout << "myvector contains: 501 502 503 300 300 400 400 200 100 100 100" << std::endl;
-}
-
-//TODO: 이상함
-void vector_max_size_test()
-{
-	ft::vector<int> myvector;
-	std::cout << "\033" << PURPLE << "\033[01m";
-	std::cout << "VECTOR MAX_SIZE TEST" << std::endl
-			  << std::endl;
-	// set some content in the vector:
-	for (int i = 0; i < 100; i++)
-		myvector.push_back(i);
-	print_result();
-	std::cout << "size: " << myvector.size() << "\n";
-	std::cout << "capacity: " << myvector.capacity() << "\n";
-	std::cout << "max_size: " << myvector.max_size() << "\n";
-
-	print_answer();
-
-	std::cout << "size: 100" << std::endl;
-	std::cout << "capacity: 128" << std::endl;
-	std::cout << "max_size: 1073741823" << std::endl;
 }
 
 void vector_pop_back_test()
@@ -1006,7 +983,7 @@ void list_push_front_test()
 
 	std::cout << '\n';
 	print_answer();
-	std::cout << "300 200 100 100 " << std::endl;
+	std::cout << "mylist contains: 300 200 100 100 " << std::endl;
 }
 
 void list_rbegin_test()
@@ -1897,7 +1874,6 @@ int main()
 		vector_erase_test,
 		vector_front_test,
 		vector_insert_test,
-		vector_max_size_test,
 		vector_pop_back_test,
 		vector_rbegin_test,
 		vector_rend_test,
